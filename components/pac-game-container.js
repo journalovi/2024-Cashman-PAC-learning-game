@@ -14,7 +14,9 @@ class PacGameContainer extends React.Component {
       speed: 'NORMAL',
       showGroundTruth: false,
       resetData: false,
-      n_samples: 0
+      n_samples: 0,
+      total_samples: 100,
+      testing: false
     }
 
   }
@@ -24,7 +26,9 @@ class PacGameContainer extends React.Component {
       speed: 'NORMAL',
       showGroundTruth: false,
       resetData: false,
-      n_samples: 0
+      n_samples: 0,
+      total_samples: 100,
+      testing: false
     }
   }
 
@@ -48,8 +52,8 @@ class PacGameContainer extends React.Component {
     this.setState({speed: 'FASTER'});
   }
 
-  testitout() {
-    this.setState({speed: 'FINISH'});
+  toggleTesting() {
+    this.setState({testing: true});
   }
 
   incrementSamples() {
@@ -80,18 +84,21 @@ class PacGameContainer extends React.Component {
                   <Button onClick={this.pause.bind(this)}><Pause/></Button>
                   <Button onClick={this.play.bind(this)}><PlayArrow/></Button>
                   <Button onClick={this.faster.bind(this)}><SkipNext/></Button>
-                  <Button onClick={this.testitout.bind(this)}>Test!</Button>
+                  <Button onClick={this.toggleTesting.bind(this)}>Test!</Button>
                   <Button onClick={this.toggleGroundTruth.bind(this)}>Toggleshow</Button>
                   <div>{this.state.n_samples} samples</div>
                 </Grid>
               </Grid>
               <Grid item xs={12}>
                 <PacScatter
-                  n_samples={this.state.n_samples}
+                  total_samples={this.state.total_samples}
                   speed={this.state.speed}
                   showGroundTruth={this.state.showGroundTruth}
                   resetData={this.state.resetData}
-                  targetDistributionType="ellipse"
+                  targetTrainDistributionType="ellipse"
+                  targetTestDistributionType="ellipse"
+                  trainMatchTest={true}
+                  testing={this.state.testing}
                 />
               </Grid>
             </Grid>

@@ -40,18 +40,32 @@ class PacScatter extends D3Component {
     // Generating the random data
     // First, generate the bounds.
     this.outerBounds = { x: { min: 0.0, max: 1.0 }, y: { min: 0.0, max: 1.0 } };
-    // this.targetDistributionType = 'rectangle';
-    this.targetDistribution = this.generateRandomRect(this.outerBounds);
-    let generatedData = [];
-    if (this.props.targetDistributionType === 'ellipse') {
-      generatedData = this.generateUniformEllipseData(this.targetDistribution, this.outerBounds, 500)
+    // this.targetTrainDistributionType = 'rectangle';
+    this.targetTrainDistribution = this.generateRandomRect(this.outerBounds);
+    // targetTrainDistributionType="ellipse"
+    // targetTestDistributionType="ellipse"
+    // trainMatchTest={true}
+    if (this.props.trainMatchTest) {
+      this.targetTestDistribution = this.targetTrainDistribution;
     } else {
-      generatedData = this.generateUniformRectData(this.targetDistribution, this.outerBounds, 500)  
+      this.targetTestDistribution = this.generateRandomRect(this.outerBounds);
     }
 
-    this.setState({data: generatedData});
-    this.xScale.domain([d3.min(generatedData, this.xValue), d3.max(generatedData, this.xValue)]);
-    this.yScale.domain([d3.min(generatedData, this.yValue), d3.max(generatedData, this.yValue)]);
+    if (this.props.targetTrainDistributionType === 'ellipse') {
+      this.generatedTrainData = this.generateUniformEllipseData(this.targetTrainDistribution, this.outerBounds, this.props.total_samples)
+    } else {
+      this.generatedTrainData = this.generateUniformRectData(this.targetTrainDistribution, this.outerBounds, this.props.total_samples)  
+    }
+
+    if (this.props.targetTestDistributionType === 'ellipse') {
+      this.generatedTestData = this.generateUniformEllipseData(this.targetTestDistribution, this.outerBounds, this.props.total_samples)
+    } else {
+      this.generatedTestData = this.generateUniformRectData(this.targetTestDistribution, this.outerBounds, this.props.total_samples)  
+    }
+
+    this.setState({data: this.generatedTrainData});
+    this.xScale.domain([this.outerBounds.x.min, this.outerBounds.x.max]);
+    this.yScale.domain([this.outerBounds.y.min, this.outerBounds.y.max]);
     this.svg.append("g")
       .attr("class", "x axis")
       .attr("transform", "translate(0," + this.height + ")")
@@ -61,7 +75,7 @@ class PacScatter extends D3Component {
       .call(this.yAxis)
 
           // this.drawAllPoints();
-    this.setState((state, props) => { return { dataQueue: generatedData.slice()}},
+    this.setState((state, props) => { return { dataQueue: this.generatedTrainData.slice()}},
                   () => {
                     if (this.props.speed !== 'PAUSE') {
                       this.animatePoints();
@@ -112,6 +126,19 @@ class PacScatter extends D3Component {
   update(props, oldProps) {
     this.drawTargetDistribution(props.showGroundTruth);
 
+    if (!oldProps.testing && props.testing) {
+      // We've switched from training to testing
+      this.setState((state, props) => { return { dataQueue: this.generatedTestData.slice()}},
+        () => {
+          // First, remove all circles
+          this.eraseAllPoints();
+
+          this.animatePoints('FINISH');
+          this.drawTargetDistribution(this.props.showGroundTruth);
+        }
+      )    
+    }
+
     if ((oldProps.speed === 'PAUSE' || this.state.timerStarted == false) && props.speed !== 'PAUSE') {
       this.state.lastSpeed = props.speed;
       this.animatePoints(props.speed);
@@ -135,13 +162,26 @@ class PacScatter extends D3Component {
           } else {
             this.state.timerStarted = true;
             this.drawNextPoint();
-            this.animatePoints(this.props.speed);  
+            if (speed === 'FINISH') {
+              this.animatePoints('FINISH');
+            } else {
+              this.animatePoints(this.props.speed);
+            }
           }
         },
         this.updateTime(speed)
       )
   
     }
+  }
+
+  eraseAllPoints() {
+    this.svg.selectAll('circle')
+      .attr("r", 3.5)
+      .transition()
+      .duration(500)
+      .attr("r", 0.5)
+      .remove();
   }
 
   drawNextPoint() {
@@ -172,7 +212,7 @@ class PacScatter extends D3Component {
   }
 
   drawTargetDistribution(forceDraw=false) {
-    switch (this.props.targetDistributionType) {
+    switch (this.props.targetTrainDistributionType) {
       case 'rectangle':
         this.drawTargetDistributionRectangle(forceDraw);
         return;
@@ -180,7 +220,7 @@ class PacScatter extends D3Component {
         this.drawTargetDistributionEllipse(forceDraw);
         return;
       default:
-        console.log("tried to draw target distribution for ", this.props.targetDistributionType);
+        console.log("tried to draw target distribution for ", this.props.targetTrainDistributionType);
     }
   }
 
@@ -189,10 +229,10 @@ class PacScatter extends D3Component {
     if (forceDraw) {
       this.svg.append("rect")
         .attr("class", "rect target-distribution")
-        .attr("x", this.xScale(this.targetDistribution.x.min))
-        .attr("y", this.yScale(this.targetDistribution.y.max))
-        .attr("width", this.xScale(this.targetDistribution.x.max) - this.xScale(this.targetDistribution.x.min))
-        .attr("height", this.yScale(this.targetDistribution.y.min) - this.yScale(this.targetDistribution.y.max))
+        .attr("x", this.xScale(this.targetTrainDistribution.x.min))
+        .attr("y", this.yScale(this.targetTrainDistribution.y.max))
+        .attr("width", this.xScale(this.targetTrainDistribution.x.max) - this.xScale(this.targetTrainDistribution.x.min))
+        .attr("height", this.yScale(this.targetTrainDistribution.y.min) - this.yScale(this.targetTrainDistribution.y.max))
     }
   }
 
@@ -201,10 +241,10 @@ class PacScatter extends D3Component {
     if (forceDraw) {
       this.svg.append("ellipse")
         .attr("class", "ellipse target-distribution")
-        .attr("cx", this.xScale((this.targetDistribution.x.min + this.targetDistribution.x.max) / 2.0))
-        .attr("cy", this.yScale((this.targetDistribution.y.min + this.targetDistribution.y.max) / 2.0))
-        .attr("rx", (this.xScale(this.targetDistribution.x.max) - this.xScale(this.targetDistribution.x.min)) / 2.0)
-        .attr("ry", (this.yScale(this.targetDistribution.y.min) - this.yScale(this.targetDistribution.y.max)) / 2.0)
+        .attr("cx", this.xScale((this.targetTrainDistribution.x.min + this.targetTrainDistribution.x.max) / 2.0))
+        .attr("cy", this.yScale((this.targetTrainDistribution.y.min + this.targetTrainDistribution.y.max) / 2.0))
+        .attr("rx", (this.xScale(this.targetTrainDistribution.x.max) - this.xScale(this.targetTrainDistribution.x.min)) / 2.0)
+        .attr("ry", (this.yScale(this.targetTrainDistribution.y.min) - this.yScale(this.targetTrainDistribution.y.max)) / 2.0)
     }
   }
 
