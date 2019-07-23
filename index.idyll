@@ -1,0 +1,104 @@
+[meta title:"pac_learning" description:"An illustration of PAC Learning and why ML models can fail in deployment." /]
+
+[Header
+  fullWidth:true
+  title:"PAC Learning"
+  subtitle:"Or: Why We Should (and Shouldn't) Trust Machine Learning"
+  author:"Dylan Cashman"
+  authorLink:"https://www.eecs.tufts.edu/~dcashm01/"
+  date:`(new Date()).toDateString()`
+  background:"#222222"
+  color:"#ffffff"
+   /]
+
+## Introduction
+
+Machine learning is such a ubiquitous topic today that (story about how many people are using them).  
+They are actively being used in (a bunch of examples, criminal justice, cars, etc.).  
+But when we deploy machine learning algorithms out in the wild, how do we _know_ that they will work at their intended goal?
+
+The answer, of course, is that we don't know for sure the models will work as intended.  
+We train models on a dataset, and then hope that the model's performance on a portion of that dataset is representative 
+on however that model will be used out in the wild.  (anecdote about self-driving car).  
+(anecdote about image classifiers working poorly on african american women).
+
+So why do these models fail, and what can we do about that?  To answer that question, we're going to look at a subfield 
+of Machine Learning called Computational Learning Theory, and particularly the concept of Probably Approximately Correct Learning.  
+
+Or, you can skip right to the game and try to play as a machine learning algorithm.
+
+## PAC-learning
+
+Computational Learning Theorists attempt to find theoretically sound definitions of concepts found in machine learning, 
+such as training data, validation accuracy, and modelling.  These definitions are then used to prove bounds on various 
+metrics like error and runtime.  The paradigm of Probably Approximately Correct learning, or PAC learning, has the 
+explicit goal of determining under what conditions a machine learning algorithm will most likely perform about as well as it does 
+on a training set, when deployed in the wild.
+
+[FullWidth/]
+[PacGameContainer fullWidth:true /]
+
+// [Fixed]
+  // [PacGameContainer/]
+// [/Fixed]
+// [FullWidth]
+//   [PacGameContainer/]
+// [/FullWidth]
+
+// [var name:"state" value:0 /]
+// [CustomD3Component className:"d3-component" state:state /]
+// [button onClick:`state++`]
+//   Click Me.
+// [/button]
+
+// Configuration can be done via the `idyll` field in `package.json`.
+
+// ## Components
+
+// Components can be embedded using a bracket syntax:
+
+// ```
+// [Range /]
+// ```
+
+// and can contain nested content:
+
+// ```
+// [Equation]e = mc^{2}[/Equation]
+// ```
+
+// Components accept properties:
+
+// ```
+// [Range value:x min:0 max:1 /]
+// ```
+
+// that can be bound to variables to achieve interactivity (more in next section).
+
+
+// A variety of components are included by default. See [all the available components](https://idyll-lang.org/docs/components/). You can also use any html tag, for example: `[div] A div! [/div]`.
+
+// To create your own, add it to the `components/` folder. There are examples of how to use Idyll with React and D3 based components already included.
+
+
+
+// ## Interactivity
+
+// Here is how you can instantiate a variable and bind it to a component:
+
+// [var name:"exampleVar" value:5 /]
+
+// [Range min:0 max:10 value:exampleVar /]
+// [Display value:exampleVar /]
+
+// ```
+// [var name:"exampleVar" value:5 /]
+
+// [Range min:0 max:10 value:exampleVar /]
+// [Display value:exampleVar /]
+// ```
+
+// ## Learn More
+
+// To learn more see the documentation at https://idyll-lang.org/docs/,
+// join our [chatroom](https://gitter.im/idyll-lang/Lobby), or see the project on [GitHub](https://github.com/idyll-lang/idyll).

@@ -1,0 +1,37 @@
+
+.d3-component svg {
+  background: #ddd;
+  max-height: 300px;
+}
+
+@media all and (max-width: 1000px) {
+  .d3-component svg {
+    max-height: 200px;
+  }
+}
+
+/* Make the blog format use more space for now */
+/* .idyll-text-container { */
+  /* max-width: 1000px; */
+/* } */
+
+/* Styling for PacGameContainer */
+.pac-game-step {
+  padding: 14px;
+}
+
+.pac-game-container rect {
+  border: 2px solid;
+}
+
+.pac-game-container .target-distribution {
+  background: 'green';
+  opacity: 0.2;
+  border-color: 'green';
+}
+
+.pac-game-container .suggested-distribution {
+  background: 'blue';
+  opacity: 0.2;
+  border-color: 'blue';
+}
