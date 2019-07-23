@@ -91,7 +91,7 @@ class PacGameContainer extends React.Component {
                   speed={this.state.speed}
                   showGroundTruth={this.state.showGroundTruth}
                   resetData={this.state.resetData}
-                  testProp="HELLO"
+                  targetDistributionType="ellipse"
                 />
               </Grid>
             </Grid>

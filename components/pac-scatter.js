@@ -40,9 +40,15 @@ class PacScatter extends D3Component {
     // Generating the random data
     // First, generate the bounds.
     this.outerBounds = { x: { min: 0.0, max: 1.0 }, y: { min: 0.0, max: 1.0 } };
-    this.targetDistributionType = 'rectangle';
-    this.targetDistribution = this.generateRandomSquare(this.outerBounds);
-    let generatedData = this.generateUniformRectData(this.targetDistribution, this.outerBounds, 500)
+    // this.targetDistributionType = 'rectangle';
+    this.targetDistribution = this.generateRandomRect(this.outerBounds);
+    let generatedData = [];
+    if (this.props.targetDistributionType === 'ellipse') {
+      generatedData = this.generateUniformEllipseData(this.targetDistribution, this.outerBounds, 500)
+    } else {
+      generatedData = this.generateUniformRectData(this.targetDistribution, this.outerBounds, 500)  
+    }
+
     this.setState({data: generatedData});
     this.xScale.domain([d3.min(generatedData, this.xValue), d3.max(generatedData, this.xValue)]);
     this.yScale.domain([d3.min(generatedData, this.yValue), d3.max(generatedData, this.yValue)]);
@@ -166,11 +172,15 @@ class PacScatter extends D3Component {
   }
 
   drawTargetDistribution(forceDraw=false) {
-    switch (this.targetDistributionType) {
+    switch (this.props.targetDistributionType) {
       case 'rectangle':
         this.drawTargetDistributionRectangle(forceDraw);
+        return;
+      case 'ellipse':
+        this.drawTargetDistributionEllipse(forceDraw);
+        return;
       default:
-        console.log("tried to draw target distribution for ", this.targetDistributionType);
+        console.log("tried to draw target distribution for ", this.props.targetDistributionType);
     }
   }
 
@@ -186,6 +196,18 @@ class PacScatter extends D3Component {
     }
   }
 
+  drawTargetDistributionEllipse(forceDraw=false) {
+    this.svg.selectAll(".target-distribution").remove();
+    if (forceDraw) {
+      this.svg.append("ellipse")
+        .attr("class", "ellipse target-distribution")
+        .attr("cx", this.xScale((this.targetDistribution.x.min + this.targetDistribution.x.max) / 2.0))
+        .attr("cy", this.yScale((this.targetDistribution.y.min + this.targetDistribution.y.max) / 2.0))
+        .attr("rx", (this.xScale(this.targetDistribution.x.max) - this.xScale(this.targetDistribution.x.min)) / 2.0)
+        .attr("ry", (this.yScale(this.targetDistribution.y.min) - this.yScale(this.targetDistribution.y.max)) / 2.0)
+    }
+  }
+
   // Generating random data
   generateUniformRectData(rectBounds, outerBounds, n=10) {
     let rectData = [];
@@ -195,27 +217,47 @@ class PacScatter extends D3Component {
     return rectData;
   }
 
-  generateUniformRandomPt(rectBounds, outerBounds) {
-    const rectXMin = rectBounds.x.min, 
-    rectXMax = rectBounds.x.max, 
-    rectYMin = rectBounds.y.min, 
-    rectYMax = rectBounds.y.max;
+  generateUniformEllipseData(ellipseBounds, outerBounds, n=10) {
+    let ellipseData = [];
+    for (let i=0; i<n; i++) {
+      ellipseData.push(this.generateUniformRandomPt(ellipseBounds, outerBounds, 'ellipse'));
+    }
+    return ellipseData;
+  }
 
-    const outerXMin = outerBounds.x.min, 
-    outerXMax = outerBounds.x.max, 
-    outerYMin = outerBounds.y.min, 
+  generateUniformRandomPt(shapeBounds, outerBounds, region='rectangle') {
+    const outerXMin = outerBounds.x.min,
+    outerXMax = outerBounds.x.max,
+    outerYMin = outerBounds.y.min,
     outerYMax = outerBounds.y.max;
 
     const xVal = this.getRandomArbitrary(outerXMin, outerXMax);
     const yVal = this.getRandomArbitrary(outerYMin, outerYMax);
 
-    const label = (rectXMin < xVal) && (xVal < rectXMax) &&
-                  (rectYMin < yVal) && (yVal < rectYMax);
+    const rectXMin = shapeBounds.x.min, 
+    rectXMax = shapeBounds.x.max, 
+    rectYMin = shapeBounds.y.min, 
+    rectYMax = shapeBounds.y.max;
+
+    let label = false;
+    if (region === 'ellipse') {
+      const ellipseCX = (rectXMin + rectXMax) / 2.0,
+      ellipseCY = (rectYMin + rectYMax) / 2.0,
+      ellipseRX = (rectXMax - rectXMin) / 2.0, 
+      ellipseRY = (rectYMax - rectYMin) / 2.0;
+      // ((x-h)^2)/(r_x)^2 + ((y-k)^2)/(r_y)^2 <= 1
+      label = (((xVal - ellipseCX)*(xVal - ellipseCX))/(ellipseRX*ellipseRX)
+            + ((yVal - ellipseCY)*(yVal - ellipseCY))/(ellipseRY*ellipseRY))
+            < 1.0;
+    } else { // rectangle
+      label = (rectXMin < xVal) && (xVal < rectXMax) &&
+              (rectYMin < yVal) && (yVal < rectYMax);
+    }
 
     return {x: xVal, y: yVal, label: label};
   }
 
-  generateRandomSquare(outerBounds, minwidth=0.2, margin=0.05) {
+  generateRandomRect(outerBounds, minwidth=0.2, margin=0.05) {
     const outerXMin = outerBounds.x.min, 
     outerXMax = outerBounds.x.max, 
     outerYMin = outerBounds.y.min, 
