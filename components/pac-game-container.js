@@ -16,7 +16,9 @@ class PacGameContainer extends React.Component {
       resetData: false,
       n_samples: 0,
       total_samples: 100,
-      testing: false
+      testing: false,
+      sampleError: "N/A",
+      testError: "N/A"
     }
 
   }
@@ -28,7 +30,9 @@ class PacGameContainer extends React.Component {
       resetData: false,
       n_samples: 0,
       total_samples: 100,
-      testing: false
+      testing: false,
+      sampleError: "N/A",
+      testError: "N/A"
     }
   }
 
@@ -62,6 +66,24 @@ class PacGameContainer extends React.Component {
     });
   }
 
+  resetSamples() {
+    this.setState((state, props) => {
+      return {n_samples: 0}
+    });
+  }
+
+  updateSampleError(errorString) {
+    this.setState((state, props) => {
+      return {sampleError: errorString}
+    });
+  }
+
+  updateTestError(errorString) {
+    this.setState((state, props) => {
+      return {testError: errorString}
+    });
+  }
+
   render() {
     const { hasError, idyll, updateProps, ...props } = this.props;
 
@@ -87,6 +109,8 @@ class PacGameContainer extends React.Component {
                   <Button onClick={this.toggleTesting.bind(this)}>Test!</Button>
                   <Button onClick={this.toggleGroundTruth.bind(this)}>Toggleshow</Button>
                   <div>{this.state.n_samples} samples</div>
+                  <div>Sample Error: {this.state.sampleError}</div>
+                  <div>Test Error: {this.state.testError}</div>
                 </Grid>
               </Grid>
               <Grid item xs={12}>
@@ -99,6 +123,10 @@ class PacGameContainer extends React.Component {
                   targetTestDistributionType="ellipse"
                   trainMatchTest={true}
                   testing={this.state.testing}
+                  updateSampleError={this.updateSampleError.bind(this)}
+                  updateTestError={this.updateTestError.bind(this)}
+                  incrementSamples={this.incrementSamples.bind(this)}
+                  resetSamples={this.resetSamples.bind(this)}
                 />
               </Grid>
             </Grid>
