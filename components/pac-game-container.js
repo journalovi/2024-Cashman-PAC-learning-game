@@ -13,6 +13,7 @@ class PacGameContainer extends React.Component {
     this.state = {
       speed: 'NORMAL',
       showGroundTruth: false,
+      showCandidate: false,
       resetData: false,
       n_samples: 0,
       total_samples: 100,
@@ -27,6 +28,7 @@ class PacGameContainer extends React.Component {
     this.state = {
       speed: 'NORMAL',
       showGroundTruth: false,
+      showCandidate: false,
       resetData: false,
       n_samples: 0,
       total_samples: 100,
@@ -38,6 +40,10 @@ class PacGameContainer extends React.Component {
 
   toggleGroundTruth() {
     this.setState({showGroundTruth: !this.state.showGroundTruth})
+  }
+
+  toggleCandidate() {
+    this.setState({showCandidate: !this.state.showCandidate})
   }
 
   refresh() {
@@ -100,7 +106,8 @@ class PacGameContainer extends React.Component {
               <Grid item xs={12} className='pac-game-step'>How does Viz fix this?</Grid>
             </Grid>
             <Grid item xs={10}>
-              <Grid container spacing={4}>
+              <Grid container spaci
+              ng={4}>
                 <Grid item xs={12}>
                   <Button onClick={this.refresh.bind(this)}>re</Button>
                   <Button onClick={this.pause.bind(this)}><Pause/></Button>
@@ -108,6 +115,10 @@ class PacGameContainer extends React.Component {
                   <Button onClick={this.faster.bind(this)}><SkipNext/></Button>
                   <Button onClick={this.toggleTesting.bind(this)}>Test!</Button>
                   <Button onClick={this.toggleGroundTruth.bind(this)}>Toggleshow</Button>
+                  <Button onClick={this.toggleCandidate.bind(this)}>cand</Button>
+                  <Button onClick={this.toggleCandidate.bind(this)}>cand</Button>
+                  <Button onClick={this.toggleCandidate.bind(this)}>cand</Button>
+                  <Button onClick={this.toggleCandidate.bind(this)}>cand</Button>
                   <div>{this.state.n_samples} samples</div>
                   <div>Sample Error: {this.state.sampleError}</div>
                   <div>Test Error: {this.state.testError}</div>
@@ -118,9 +129,10 @@ class PacGameContainer extends React.Component {
                   total_samples={this.state.total_samples}
                   speed={this.state.speed}
                   showGroundTruth={this.state.showGroundTruth}
+                  showCandidate={this.state.showCandidate}
                   resetData={this.state.resetData}
-                  targetTrainDistributionType="ellipse"
-                  targetTestDistributionType="ellipse"
+                  targetTrainDistributionType="rectangle"
+                  targetTestDistributionType="rectangle"
                   trainMatchTest={true}
                   testing={this.state.testing}
                   updateSampleError={this.updateSampleError.bind(this)}

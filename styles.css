@@ -25,13 +25,15 @@
 }
 
 .pac-game-container .target-distribution {
-  background: 'green';
+  fill: green;
+  color: green;
   opacity: 0.2;
-  border-color: 'green';
+  border-color: green;
 }
 
-.pac-game-container .suggested-distribution {
-  background: 'blue';
+.pac-game-container .candidate-distribution {
+  fill: blue;
+  color: blue;
   opacity: 0.2;
-  border-color: 'blue';
+  border-color: blue;
 }

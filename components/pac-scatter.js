@@ -34,11 +34,20 @@ class PacScatter extends D3Component {
     // Generating the random data
     // First, generate the bounds.
     this.outerBounds = { x: { min: 0.0, max: 1.0 }, y: { min: 0.0, max: 1.0 } };
-    this.targetTrainDistribution = this.generateRandomRect(this.outerBounds);
+    if (this.props.targetTrainDistribution) {
+      this.targetTrainDistribution = this.props.targetTrainDistribution;
+    } else {
+      this.targetTrainDistribution = this.generateRandomRect(this.outerBounds);
+    }
+
     if (this.props.trainMatchTest) {
       this.targetTestDistribution = this.targetTrainDistribution;
     } else {
-      this.targetTestDistribution = this.generateRandomRect(this.outerBounds);
+      if (this.props.targetTestDistribution) {
+        this.targetTestDistribution = this.props.targetTestDistribution;
+      } else {
+        this.targetTestDistribution = this.generateRandomRect(this.outerBounds);
+      }
     }
 
     if (this.props.targetTrainDistributionType === 'ellipse') {
@@ -64,15 +73,26 @@ class PacScatter extends D3Component {
       .attr("class", "y axis")
       .call(this.yAxis)
 
-          // this.drawAllPoints();
+    if (this.props.brushable) {
+      this.svg.append("g")
+      .attr("class", "brush")
+      .call(d3.brush()
+      .extent([[0, 0], [this.width, this.height]])
+      .on("brush end", this.brushed.bind(this)));
+    }
+
     this.setState((state, props) => { return { dataQueue: this.generatedTrainData.slice(),
-                    candidateBoundingBox: this.generateRandomRect(this.outerBounds)
+                    // candidateDistribution: this.generateRandomRect(this.outerBounds)
                   }},
                   () => {
-                    if (this.props.speed !== 'PAUSE') {
+                    if (this.props.drawAllPoints) {
+                      this.drawAllPoints();
+                    } else if (this.props.speed !== 'PAUSE') {
                       this.animatePoints();
                     }
+                
                     this.drawTargetDistribution(this.props.showGroundTruth);
+                    this.drawCandidateDistribution(this.props.showCandidate);
                   }    
     );
 
@@ -83,8 +103,9 @@ class PacScatter extends D3Component {
     this.state = {
       data: [],
       dataQueue: [],
+      drawnPoints: [],
       lastSpeed: 'PAUSE',
-      candidateBoundingBox: { x: { min: 0.0, max: 1.0 }, y: { min: 0.0, max: 1.0 } }
+      candidateDistribution: { x: { min: 0.0, max: 1.0 }, y: { min: 0.0, max: 1.0 } }
     }
     this.groundTruthBox = React.createRef();
     this.svg = React.createRef();
@@ -110,6 +131,7 @@ class PacScatter extends D3Component {
     this.state = {
       data: [],
       dataQueue: [],
+      drawnPoints: [],
       lastSpeed: 'PAUSE',
       timerStarted: false
     }
@@ -118,6 +140,16 @@ class PacScatter extends D3Component {
 
   update(props, oldProps) {
     this.drawTargetDistribution(props.showGroundTruth);
+    this.drawCandidateDistribution(props.showCandidate);
+    if (this.props.toggledClosestBounds) {
+      this.setClosestBounds.bind(this)();
+    }
+    if (this.props.toggledFurthestBounds) {
+      this.setFurthestBounds.bind(this)();
+    }
+    if (this.props.toggledMaxMarginBounds) {
+      this.setMaxMarginBounds.bind(this)();
+    }
 
     if (!oldProps.testing && props.testing) {
       // We've switched from training to testing
@@ -128,6 +160,7 @@ class PacScatter extends D3Component {
 
           this.animatePoints('FINISH');
           this.drawTargetDistribution(this.props.showGroundTruth);
+          this.drawCandidateDistribution(this.props.showCandidate);
         }
       )    
     }
@@ -145,6 +178,28 @@ class PacScatter extends D3Component {
   //     this.animatePoints();
   //   }
   // }
+
+  brushed() {
+    console.log("brushed called, and d3.event.type is ", d3.event.type)
+    if (d3.event.type === 'end' && d3.event.selection) {
+      const [[x0, y0], [x1, y1]] = d3.event.selection;
+      // Set candidate rectangle to this boundary.
+      console.log("this is ", this)
+      console.log("this.state is ", this.state)
+      const newBoundingBox = {
+        x: {
+          min: this.xScale.invert(x0),
+          max: this.xScale.invert(x1),
+        },
+        y: {
+          min: this.yScale.invert(y1),
+          max: this.yScale.invert(y0)
+        }
+      }
+      console.log("newBoundingBox is ", newBoundingBox);
+      this.setState({ candidateDistribution: newBoundingBox });
+    }
+ }
 
   animatePoints(speed='NORMAL') {
     if (this.state.dataQueue.length > 0) {
@@ -176,11 +231,23 @@ class PacScatter extends D3Component {
       .attr("r", 0.5)
       .remove();
 
+    this.setState({drawnPoints: []});
     this.props.resetSamples();
   }
 
   drawNextPoint() {
     const datum = this.state.dataQueue.pop();
+    this.setState((state, props) => { return { drawnPoints: state.drawnPoints.concat([datum]) } },
+      () => { 
+        this.props.incrementSamples();
+        if (this.props.testing) {
+          this.props.updateTestError(this.calculateTestError())
+        } else {
+          this.props.updateSampleError(this.calculateSampleError())
+        }
+      }
+    );
+
     this.svg.append("circle")
       .attr("class", "dot")
       .attr("cx", this.xMap(datum))
@@ -193,13 +260,6 @@ class PacScatter extends D3Component {
       .transition()
       .duration(1000)
       .attr("r", 3.5);
-
-    this.props.incrementSamples();
-    if (this.props.testing) {
-      this.props.updateTestError(this.calculateTestError())
-    } else {
-      this.props.updateSampleError(this.calculateSampleError())
-    }
   }
 
   drawAllPoints() {
@@ -214,30 +274,87 @@ class PacScatter extends D3Component {
   }
 
   calculateSampleError() {
-    if (this.props.targetTrainDistributionType === 'rectangle') {
-      return this.calculateErrorRectangle(this.state.candidateBoundingBox, this.state.targetTrainDistribution);
-    } else if (this.props.targetTrainDistributionType === 'ellipse') {
-      return this.calculateErrorEllipse(this.state.candidateBoundingBox, this.state.targetTrainDistribution);
-    }
+    // We only have rectangular hypotheses for now...
+
+
+    // if (this.props.targetTrainDistributionType === 'rectangle') {
+      // return this.calculateSampleErrorRectangle(this.state.candidateDistribution);
+    // } else if (this.props.targetTrainDistributionType === 'ellipse') {
+      // return this.calculateSampleErrorEllipse(this.state.candidateDistribution);
+    // }
+    return this.calculateSampleErrorRectangle(this.state.candidateDistribution);
+
   }
 
   calculateTestError() {
     if (this.props.targetTestDistributionType === 'rectangle') {
-      return this.calculateErrorRectangle(this.state.candidateBoundingBox, this.state.targetTestDistribution);
+      return this.calculateErrorRectangle(this.state.candidateDistribution, this.targetTestDistribution);
     } else if (this.props.targetTestDistributionType === 'ellipse') {
-      return this.calculateErrorEllipse(this.state.candidateBoundingBox, this.state.targetTestDistribution);
+      return this.calculateErrorEllipse(this.state.candidateDistribution, this.targetTestDistribution);
     }
 
   }
 
-  calculateErrorRectangle() {
+  calculateSampleErrorRectangle(boundingBox) {
+    const totalSamples = this.state.drawnPoints.length * 1.0;
+    // console.log("boundingBox is ", boundingBox, ", and this.targetTrainDistribution is ", this.targetTrainDistribution);
+
+    if (totalSamples > 0 && boundingBox) {
+      let incorrectSamples = 0.0;
+      for (let i = 0; i < totalSamples; i++) {
+        let datum = this.state.drawnPoints[i];
+        let predictedLabel = this.ptInRect(datum.x, datum.y, boundingBox);
+        // console.log("datum is ", datum, ", boundingBox is ", boundingBox, " and predictedLabel is ", predictedLabel);
+        if (predictedLabel !== datum.label) {
+          incorrectSamples++;
+        }
+      }
+      // console.log("incorrectSamples is ", incorrectSamples, " and totalSamples is ", totalSamples);
+      // return incorrectSamples / totalSamples;
+      return `${incorrectSamples} out of ${totalSamples} : ${(incorrectSamples / totalSamples).toPrecision(2)}`
+    } else {
+      // return 0.0;
+      return 'N/A'
+    }
+  }
+
+  calculateSampleErrorEllipse(boundingBox) {
+    const totalSamples = this.state.drawnPoints.length * 1.0;
+
+    if (totalSamples > 0 && boundingBox) {
+      let incorrectSamples = 0.0;
+      for (let i = 0; i < totalSamples; i++) {
+        let datum = this.state.drawnPoints[i];
+        let predictedLabel = this.ptInEllipse(datum.x, datum.y, boundingBox);
+        if (predictedLabel !== datum.label) {
+          incorrectSamples++;
+        }
+      }
+      return incorrectSamples / totalSamples;
+    } else {
+      return 0.0;
+    }
+  }
+
+  calculateErrorRectangle(candidateDistribution, targetBoundingBox) {
     // error = area of both rectangles minus 2 * overlap.
-    // const intersectionRect = calculateIntersectionRect(this.targetTrainDistribution, this.candidateBoundingBox);
-    return 0.2;
+    const intersectionRectArea = this.calculateIntersectionRectArea(targetBoundingBox, candidateDistribution);
+    const candidateBoxArea = (candidateDistribution.x.max - candidateDistribution.x.min) * (candidateDistribution.y.max - candidateDistribution.y.min);
+    const targetBoxArea = (targetBoundingBox.x.max - targetBoundingBox.x.min) * (targetBoundingBox.y.max - targetBoundingBox.y.min);
+
+    return (candidateBoxArea + targetBoxArea - (2.0 * intersectionRectArea)).toPrecision(2);
   }
 
   calculateErrorEllipse() {
     return 0.4;
+  }
+
+  calculateIntersectionRectArea(boxA, boxB) {
+    let x_overlap = Math.max(0, Math.min(boxA.x.max, boxB.x.max) - Math.max(boxA.x.min, boxB.x.min));
+    let y_overlap = Math.max(0, Math.min(boxA.y.max, boxB.y.max) - Math.max(boxA.y.min, boxB.y.min));
+    let overlapArea = x_overlap * y_overlap;
+
+    return overlapArea
   }
 
   drawTargetDistribution(forceDraw=false) {
@@ -245,6 +362,18 @@ class PacScatter extends D3Component {
       this.drawTargetDistributionRectangle(forceDraw);
     } else if (this.props.targetTrainDistributionType === 'ellipse') {
       this.drawTargetDistributionEllipse(forceDraw);
+    }
+  }
+
+  drawCandidateDistribution(forceDraw=false) {
+    this.svg.selectAll(".candidate-distribution").remove();
+    if (forceDraw && this.state.candidateDistribution) {
+      this.svg.append("rect")
+        .attr("class", "rect candidate-distribution")
+        .attr("x", this.xScale(this.state.candidateDistribution.x.min))
+        .attr("y", this.yScale(this.state.candidateDistribution.y.max))
+        .attr("width", this.xScale(this.state.candidateDistribution.x.max) - this.xScale(this.state.candidateDistribution.x.min))
+        .attr("height", this.yScale(this.state.candidateDistribution.y.min) - this.yScale(this.state.candidateDistribution.y.max))
     }
   }
 
@@ -257,6 +386,10 @@ class PacScatter extends D3Component {
         .attr("y", this.yScale(this.targetTrainDistribution.y.max))
         .attr("width", this.xScale(this.targetTrainDistribution.x.max) - this.xScale(this.targetTrainDistribution.x.min))
         .attr("height", this.yScale(this.targetTrainDistribution.y.min) - this.yScale(this.targetTrainDistribution.y.max))
+        // .attr("fill-opacity", 0)
+        // .transition()
+        // .duration(1000)
+        // .attr("fill-opacity", 0.5)
     }
   }
 
@@ -270,6 +403,63 @@ class PacScatter extends D3Component {
         .attr("rx", (this.xScale(this.targetTrainDistribution.x.max) - this.xScale(this.targetTrainDistribution.x.min)) / 2.0)
         .attr("ry", (this.yScale(this.targetTrainDistribution.y.min) - this.yScale(this.targetTrainDistribution.y.max)) / 2.0)
     }
+  }
+
+  setClosestBounds() {
+    const x0 = d3.min(this.drawnPoints.select((d) => d.label), (d) => d.x)
+    const x1 = d3.max(this.drawnPoints.select((d) => d.label), (d) => d.x)
+    const y0 = d3.max(this.drawnPoints.select((d) => d.label), (d) => d.y)
+    const y1 = d3.min(this.drawnPoints.select((d) => d.label), (d) => d.y)
+    const boundingBox = {
+      x: {
+        min: x0,
+        max: x1
+      },
+      y: {
+        min: y0,
+        max: y1
+      }
+    }
+
+    this.setState({candidateDistribution: boundingBox});
+  }
+
+  setFurthestBounds() {
+    const x0 = d3.max(this.drawnPoints.select((d) => !d.label), (d) => d.x)
+    const x1 = d3.min(this.drawnPoints.select((d) => !d.label), (d) => d.x)
+    const y0 = d3.min(this.drawnPoints.select((d) => !d.label), (d) => d.y)
+    const y1 = d3.max(this.drawnPoints.select((d) => !d.label), (d) => d.y)
+    const boundingBox = {
+      x: {
+        min: x0,
+        max: x1
+      },
+      y: {
+        min: y0,
+        max: y1
+      }
+    }
+
+    this.setState({candidateDistribution: boundingBox});
+  }
+
+  setMaxMarginBounds() {
+    const x0 = (d3.min(this.drawnPoints.select((d) => d.label), (d) => d.x) + d3.max(this.drawnPoints.select((d) => !d.label), (d) => d.x)) / 2.0
+    const x1 = (d3.max(this.drawnPoints.select((d) => d.label), (d) => d.x) + d3.min(this.drawnPoints.select((d) => !d.label), (d) => d.x)) / 2.0
+    const y0 = (d3.max(this.drawnPoints.select((d) => d.label), (d) => d.y) + d3.min(this.drawnPoints.select((d) => !d.label), (d) => d.y)) / 2.0
+    const y1 = (d3.min(this.drawnPoints.select((d) => d.label), (d) => d.y) + d3.max(this.drawnPoints.select((d) => !d.label), (d) => d.y)) / 2.0
+    const boundingBox = {
+      x: {
+        min: x0,
+        max: x1
+      },
+      y: {
+        min: y0,
+        max: y1
+      }
+    }
+
+    this.setState({candidateDistribution: boundingBox});
   }
 
   // Generating random data
@@ -298,27 +488,32 @@ class PacScatter extends D3Component {
     const xVal = this.getRandomArbitrary(outerXMin, outerXMax);
     const yVal = this.getRandomArbitrary(outerYMin, outerYMax);
 
-    const rectXMin = shapeBounds.x.min, 
-    rectXMax = shapeBounds.x.max, 
-    rectYMin = shapeBounds.y.min, 
-    rectYMax = shapeBounds.y.max;
-
     let label = false;
     if (region === 'ellipse') {
-      const ellipseCX = (rectXMin + rectXMax) / 2.0,
-      ellipseCY = (rectYMin + rectYMax) / 2.0,
-      ellipseRX = (rectXMax - rectXMin) / 2.0, 
-      ellipseRY = (rectYMax - rectYMin) / 2.0;
-      // ((x-h)^2)/(r_x)^2 + ((y-k)^2)/(r_y)^2 <= 1
-      label = (((xVal - ellipseCX)*(xVal - ellipseCX))/(ellipseRX*ellipseRX)
-            + ((yVal - ellipseCY)*(yVal - ellipseCY))/(ellipseRY*ellipseRY))
-            < 1.0;
+      label = this.ptInEllipse(xVal, yVal, shapeBounds);
     } else { // rectangle
-      label = (rectXMin < xVal) && (xVal < rectXMax) &&
-              (rectYMin < yVal) && (yVal < rectYMax);
+      label = this.ptInRect(xVal, yVal, shapeBounds);
     }
 
     return {x: xVal, y: yVal, label: label};
+  }
+
+  ptInRect(x, y, boundingBox) {
+    return (boundingBox.x.min < x) && (x < boundingBox.x.max) &&
+              (boundingBox.y.min < y) && (y < boundingBox.y.max);
+  }
+
+  ptInEllipse(x, y, boundingBox) {
+    // ((x-h)^2)/(r_x)^2 + ((y-k)^2)/(r_y)^2 <= 1
+    const ellipseCX = (boundingBox.x.min + boundingBox.x.max) / 2.0,
+    ellipseCY = (boundingBox.y.min + boundingBox.y.max) / 2.0,
+    ellipseRX = (boundingBox.x.max - boundingBox.x.min) / 2.0, 
+    ellipseRY = (boundingBox.y.max - boundingBox.y.min) / 2.0;
+
+    return (((x - ellipseCX)*(x - ellipseCX))/(ellipseRX*ellipseRX)
+          + ((y - ellipseCY)*(y - ellipseCY))/(ellipseRY*ellipseRY))
+          < 1.0;
+
   }
 
   generateRandomRect(outerBounds, minwidth=0.2, margin=0.05) {
@@ -344,6 +539,10 @@ class PacScatter extends D3Component {
   getRandomArbitrary(min, max) {
     return Math.random() * (max - min) + min;
   }
+}
+
+PacScatter.defaultProps = {
+  brushable: true
 }
 
 module.exports = PacScatter;
