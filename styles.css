@@ -37,3 +37,7 @@
   opacity: 0.2;
   border-color: blue;
 }
+
+.selectedButton {
+  border: 2px solid black !important;
+}

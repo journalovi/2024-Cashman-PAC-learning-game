@@ -34,6 +34,10 @@ class PacScatter extends D3Component {
     // Generating the random data
     // First, generate the bounds.
     this.outerBounds = { x: { min: 0.0, max: 1.0 }, y: { min: 0.0, max: 1.0 } };
+    this.initializeDistributions.bind(this)();
+  }
+
+  initializeDistributions() {
     if (this.props.targetTrainDistribution) {
       this.targetTrainDistribution = this.props.targetTrainDistribution;
     } else {
@@ -73,16 +77,17 @@ class PacScatter extends D3Component {
       .attr("class", "y axis")
       .call(this.yAxis)
 
+    this.brush = d3.brush()
+    .extent([[0, 0], [this.width, this.height]])
+    .on("brush end", this.brushed.bind(this)) 
     if (this.props.brushable) {
-      this.svg.append("g")
-      .attr("class", "brush")
-      .call(d3.brush()
-      .extent([[0, 0], [this.width, this.height]])
-      .on("brush end", this.brushed.bind(this)));
+      this.brushG = this.svg.append("g")
+      this.brushG.attr("class", "brush")
+        .call(this.brush);
     }
 
     this.setState((state, props) => { return { dataQueue: this.generatedTrainData.slice(),
-                    // candidateDistribution: this.generateRandomRect(this.outerBounds)
+                    candidateDistribution: null
                   }},
                   () => {
                     if (this.props.drawAllPoints) {
@@ -91,7 +96,7 @@ class PacScatter extends D3Component {
                       this.animatePoints();
                     }
                 
-                    this.drawTargetDistribution(this.props.showGroundTruth);
+                    this.drawTargetDistribution(this.props.testing);
                     this.drawCandidateDistribution(this.props.showCandidate);
                   }    
     );
@@ -105,10 +110,12 @@ class PacScatter extends D3Component {
       dataQueue: [],
       drawnPoints: [],
       lastSpeed: 'PAUSE',
-      candidateDistribution: { x: { min: 0.0, max: 1.0 }, y: { min: 0.0, max: 1.0 } }
+      candidateDistribution: null
+      // candidateDistribution: { x: { min: 0.0, max: 1.0 }, y: { min: 0.0, max: 1.0 } }
     }
     this.groundTruthBox = React.createRef();
     this.svg = React.createRef();
+    this.brushG = React.createRef();
 
     // JAVASCRIPT IS AWFUL
     // IS THERE SOMETHING BIGGER THAN CAPS?
@@ -122,7 +129,7 @@ class PacScatter extends D3Component {
     this.height = 500 - this.margin.top - this.margin.bottom;
         
     this.svg = d3.select(node).append('svg');
-    this.svg.attr('viewBox', `0 0 ${size} ${size}`)
+    this.svg
       .style('width', this.width + this.margin.left + this.margin.right)
       .style('height', this.height + this.margin.top + this.margin.bottom)
       .append("g")
@@ -138,8 +145,22 @@ class PacScatter extends D3Component {
     this.initializeData();
   }
 
+  clearBrush() {
+    this.brushG.call(this.brush.move, null);
+  }
+
   update(props, oldProps) {
-    this.drawTargetDistribution(props.showGroundTruth);
+    console.log("update called, props.setRefresh is ", props.setRefresh)
+    if (props.setRefresh) {
+      console.log("this.targetTrainDistribution is ", this.targetTrainDistribution)
+      this.clearBrush.bind(this)()
+      this.initializeDistributions.bind(this)();
+      console.log("after initialze, this.targetTrainDistribution is ", this.targetTrainDistribution)
+      this.eraseAllPoints.bind(this)()
+      this.props.updateSampleError('N/A');
+      this.props.resetRefresh();
+    }
+    this.drawTargetDistribution(props.testing);
     this.drawCandidateDistribution(props.showCandidate);
     if (this.props.toggledClosestBounds) {
       this.setClosestBounds.bind(this)();
@@ -159,7 +180,7 @@ class PacScatter extends D3Component {
           this.eraseAllPoints();
 
           this.animatePoints('FINISH');
-          this.drawTargetDistribution(this.props.showGroundTruth);
+          this.drawTargetDistribution(this.props.testing);
           this.drawCandidateDistribution(this.props.showCandidate);
         }
       )    

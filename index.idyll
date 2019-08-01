@@ -4,43 +4,122 @@
   fullWidth:true
   title:"PAC Learning"
   subtitle:"Or: Why We Should (and Shouldn't) Trust Machine Learning"
-  author:"Dylan Cashman"
-  authorLink:"https://www.eecs.tufts.edu/~dcashm01/"
+  author: "Anonymous VISxAI Submission 1812 "
   date:`(new Date()).toDateString()`
   background:"#222222"
   color:"#ffffff"
    /]
+  // author:"Dylan Cashman"
+  // authorurl:"https://www.eecs.tufts.edu/~dcashm01/"
 
 ## Introduction
 
-Machine learning is such a ubiquitous topic today that (story about how many people are using them).  
-They are actively being used in (a bunch of examples, criminal justice, cars, etc.).  
-But when we deploy machine learning algorithms out in the wild, how do we _know_ that they will work at their intended goal?
+Machine Learning algorithms are becoming ubiquitous tools in the age of big data to aid in decision making and data analysis. 
+They are actively being deployed in scenarios where their impact directly effects humans,including 
+[link text:"self-driving cars" url:"https://arxiv.org/abs/1901.04407" /], 
+[link text: "patient triaging software at hospitals" url:"https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0205836" /], and even [link text: "crime prediction software" url: "https://link.springer.com/chapter/10.1007/978-3-030-14680-1_40" /], a la [link text: "Minority Report" url: "https://www.imdb.com/title/tt0181689/" /].  
+
+When they are successful, they can result in new industries and capabilities that were science fiction only years ago.  But when they fail, they can have drastic consequences for the humans effected by them.
+But when we deploy machine learning algorithms out in the wild, how do we *know* that they will work at their intended goal?
 
 The answer, of course, is that we don't know for sure the models will work as intended.  
 We train models on a dataset, and then hope that the model's performance on a portion of that dataset is representative 
-on however that model will be used out in the wild.  (anecdote about self-driving car).  
-(anecdote about image classifiers working poorly on african american women).
+on however that model will be used out in the wild.  A recent study by researchers at the Massachusetts Institute of Technology discovered that commercial gender classification systems have less than one percent error on lighter-skinned males, and up to 35% error on darker-skinned females, presumably because they were trained on datasets that were biased towards light-skinned males.  
 
-So why do these models fail, and what can we do about that?  To answer that question, we're going to look at a subfield 
-of Machine Learning called Computational Learning Theory, and particularly the concept of Probably Approximately Correct Learning.  
+In this article, we'll play a simple game where you, the reader will act as a machine learning algorithm.   Through this simple game, we'll illustrate the basic assumptions of most machine learning algorithms, and demonstrate why fully-automated approaches will never be able to be error-free if these assumptions are validated. 
 
-Or, you can skip right to the game and try to play as a machine learning algorithm.
+--------------
+
+## The Game: Find My Rectangle
+
+In this game, [link text: "originally proposed by Blumer et. al. in 1989" url: "https://dl.acm.org/citation.cfm?id=76371" /], there is a square, and there is a rectangular region on that square that you, as the machine learning algorithm, are trying to guess.
+
+You can make guesses on the square to your right by clicking and dragging, and then test your guess by clicking "Test!".  For now, do not click the "Play" or "Fast Forward" buttons, but leave it in "Pause".  The reported error is the portion, out of 1.0, of the region that is in one of the rectangles (the "ground truth" and your proposal region) and not in the other.  You can try again by pressing the refresh button.
+
+...
+
+Not very fun, or interesting, right?
+
+This is an illustration of the [link text:"No Free Lunch theorems for optimization" url:"https://ieeexplore.ieee.org/document/585893" /].  In the absence of any information, we can do no better than random chance, and thus we can make no statements about how "correct" we are.  
+
+--------------
+
+However, suppose we are given some information.  Periodically, random samples are taken from the plane, and you, as the machine learning algorithm, are told whether they are inside the rectangular region you are guessing (in which case they are colored green), or if they are outside the rectangular region you are guessing (in which case they are colored red).  
+
+Try the game a few more times, and notice that the more samples that you see, the better chance of guessing the rectangular region.  You can never guess it exactly, until every pixel is filled in - this would correspond to seeing all possible data, for a machine learning algorithm.  But as you see more labeled examples, the amount of possible rectangular regions decreases. 
+
+Consider the various strategies that you might use to minimize your error.  Do you tightly wrap the green examples, or do you leave some space around them to allow for data you haven't seen yet?  Which strategy generally works better?  Which strategy works better in the unlucky case, where the sampled data doesn't provide much information due to bad luck?
+
+Up to this point, you have been playing the machine learning algorithm.  You have all the magnificent faculties of the human mind, letting you change and adapt your strategy as you encounter new examples.  But machine learning algorithms tend to be much simpler, and typically more stuck-in-their ways, because they have to be well-defined.  We present three simple machine learning algorithms to solve this problem.
+
+1. **Tightest Fit**:  In this algorithm, the tightest possible rectangle is chosen that still contains all of the positive examples seen so far.  This algorithm is the smallest possible region that is still consistent with the samples seen.  It is related to the principle of [link text: "Risk Minimization" url: "https://papers.nips.cc/paper/506-principles-of-risk-minimization-for-learning-theory" /], which is a strategy applicable to many machine learning problems.  This will under-estimate the rectangular region.
+2. **Loosest Fit**:  In contrast to the Tightest Fit algorithm, this algorithm chooses the loosest possible rectangle.  This rectangle will be internal to all negative examples, and will contain all positive examples.  This will over-estimate the rectangular region.
+3. **Maximum Margin**: This is a midpoint between the two previous algorithms.  It chooses a rectangle that is as far as possible from both the positive and negative examples, while containing all examples.
+
+How do we determine if any of these algorithms are good?  Or reliable?  What are the properties and assumptions that are necessary to make these judgements?
 
 ## PAC-learning
 
+When we use classical statistical methods, such as logistic regression, to analyze data, we can *trust* the model works because formalisms such as the p value and confidence intervals give us boundson the possible errors of the model.  The rectangle game proposed by Blumer et. al. that is featured in this post is designed to demonstrate how such formalisms can be defined for machine learning techniques.  
+
 Computational Learning Theorists attempt to find theoretically sound definitions of concepts found in machine learning, 
 such as training data, validation accuracy, and modelling.  These definitions are then used to prove bounds on various 
-metrics like error and runtime.  The paradigm of Probably Approximately Correct learning, or PAC learning, has the 
+metrics like error and runtime.  The paradigm of **Probably Approximately Correct learning**, or **PAC learning**, has the 
 explicit goal of determining under what conditions a machine learning algorithm will most likely perform about as well as it does 
 on a training set, when deployed in the wild.
 
-[FullWidth/]
-[PacGameContainer fullWidth:true /]
+We provide the following treatment based on chapter 1 from [link text: "Kearns and Vazirani" url: "https://mitpress.mit.edu/books/introduction-computational-learning-theory" /].  Loosely, a concept is PAC-learnable if there exists a machine learning algorithm such that, after viewing a sufficient amount of labeled samples, we can prove a bound on the error (let's say that error is smaller than some epsilon [Equation]\epsilon[/Equation]), assuming we aren't too unlucky with which samples we receive (so, with probability at least [Equation](1 - \delta)[/Equation]).  This type of analysis mirrors analysis done using p values for logistic regression, and allows us to bound error on machine learning models.  
 
-// [Fixed]
-  // [PacGameContainer/]
-// [/Fixed]
+We can use the PAC learning paradigm to analyze our algorithms.  In particular, we can look at the tightest fit algorithm, and try to bound its error, where error is defined as the probability that our algorithm's chosen region will get the label incorrect.  We would like to prove that the error is less than [Equation]\epsilon[/Equation].
+
+First, we note that the tightest-fit rectangle is always contained in the target rectangle.  We can express the total error region as four strips: the strips above, below, to the left, and to the right of the tightest-fit rectangle.  This is the only region where our algorithm will label incorrectly.  If we can guarantee that the probability of a sample lying in each strip is less than [Equation]\frac{\epsilon}{4}[/Equation], then we can conclude the total error is less than [Equation]\epsilon[/Equation].
+
+Consider the top strip, which we'll call T'.  Then, consider the strip T that starts from the top of the proposal region, and sweeps down in height until it has area [Equation]\frac{\epsilon}{4}[/Equation].  If T' is contained in T, then it has area less than [Equation]\frac{\epsilon}{4}[/Equation], and we are done.  By our algorithm, we know that our T' can only be greater in area than T if we haven't seen any samples in T, since if we had, then our proposal region would contain that point.  The probability that M independent draws all miss the region T is exactly [Equation](1 - \frac{\epsilon}{4})^M[/Equation].  
+
+The same analysis holds for the other three regions, so by the union bound, the error is at most [Equation]4(1 - \frac{\epsilon}{4})^M[/Equation].  Then, we choose M to satisfy [Equation]4(1 - \frac{\epsilon}{4})^M \leq \delta[/Equation], i.e. the probability that the area is **not** bounded by [Equation]\epsilon[/Equation] is smaller than [Equation]\delta[/Equation], so the probability that it **is** bounded by [Equation]\epsilon[/Equation] is greater than [Equation]1 - \delta[/Equation].  
+
+The final step of the proof is to determine how many samples we'd need - solving for M.  USing the inequality [Equation](1 - x) \leq e^{-x}[/Equation], we can simplify the bound to [Equation]4e^{\epsilon M / 4} \leq \delta[/Equation], and solve for [Equation]M \geq (4/\epsilon)ln(4/\delta)[/Equation].  Since M is a real, finite number, we've demonstrated that **the problem is PAC-learnable**, i.e. we have bounded the error in terms of the number of samples seen.
+
+## So Why Does it Fail?
+
+While that was a lot of math, and our conclusion can be hard to interpret, it was actually a significant result.  For this very simple problem (much simpler than the types of problems machine learning is being used to solve in the real world), we were able to show that the error on unseen examples would be bounded.
+
+But not so fast - there's a major issue that we didn't mention.  The proof we went through, as well as the PAC-learning paradigm in general, relies on several assumptions.
+
+1. That the sampled data in independent and identically distributed (typically referred to as i.i.d).  In real world data, this may not be the case; if the algorithm is being trained on streamed data, it typically cannot be considered independent draws.  This assumption was used in our probability bounds.
+2. The data that we test our algorithm on is the same distribution that we train our algorithm on.  Consider a computer vision algorithm for a self-driving car that only trained in the Pacific Northwestern United States, and then was deployed in a desert climate; the behavior of the computer vision algorithm in training might have no relationship with its behavior in testing.  This would correspond to the testing samples being labeled in a different region than during training.
+3. Our proof assumed that we already knew that the type of region we were looking for was a rectangle.  But in practice, we rarely know what kind of machine learning model will match the phenomenon being modeled in the data.  Suppose, instead of a rectangular region, the region we were looking for turned out to be an ellipse, or a parallellogram, or even an arbitrary, amorphous disconnected region.  A geometric proof would then be impossible.
+
+There are other considerations for failure scenarios for machine learning algorithms.  Varshney presented [link text:"an interesting treatment" url: "https://www.liebertpub.com/doi/full/10.1089/big.2016.0051"/] in 2017.
+
+## An argument for Visualization
+
+The game played in this blog post was hopefully a relevant illustration of some of the topics introduced.  If it's helpful, it may be because it is a visual explanation.  In general, visualizing the right properties of the data and the algorithm can help indicate to a data scientist whether any of the necessary assumptions are broken.  The data scientist can then address them by cleaning or preprocessing the data, or choosing a different machine learning algorithm.
+
+In this blog post, we looked at an incredibly simple machine learning problem, and the algorithms we considered were easily explainable in a sentence or two.  Even for this simple problem, it was difficult to prove any limitations on error.  Machine learning is typically used to model much more complex problem domains, with much more complex data and intricate, high-dimensional processes.  In these cases, it is very unlikely that error bounds are proveable, and even if they are, it is unlikely that the assumptions are upheld.  
+
+Instead, a human in the loop, armed with appropriate visualizations and analytical tools, can act as a safeguard against the most endemic cases.  This additional line of defense is more and more necessary as machine learning models are deployed in scenarios that directly affect humans. 
+
+
+
+
+
+// [PacGameContainer /]
+
+
+// [FullWidth/]
+// [PacGameContainer fullWidth:true /]
+
+## Further Reading
+
+- *An Introduction to Computational Learning Theory* by Kearns and Vazirani
+- [link text: "The Myth of the Impartial Machine by Feng and Wu" url: "https://parametric.press/issue-01/the-myth-of-the-impartial-machine/" /]
+- *Principles of Risk Minimization for Learning Theory* by Vapnik
+- *On the Safety of Machine Learning: Cyber-Physical Systems, Decision Sciences, and Data Products* by Varshney and Alemzadeh
+
+[Fixed]
+  [PacGameContainer/]
+[/Fixed]
 // [FullWidth]
 //   [PacGameContainer/]
 // [/FullWidth]

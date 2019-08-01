@@ -3,6 +3,7 @@ import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button';
 import PacScatter from './pac-scatter';
+import Refresh from '@material-ui/icons/Refresh';
 import Pause from '@material-ui/icons/Pause';
 import PlayArrow from '@material-ui/icons/PlayArrow';
 import SkipNext from '@material-ui/icons/SkipNext';
@@ -11,7 +12,7 @@ class PacGameContainer extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      speed: 'NORMAL',
+      speed: 'PAUSE',
       showGroundTruth: false,
       showCandidate: false,
       resetData: false,
@@ -26,7 +27,7 @@ class PacGameContainer extends React.Component {
 
   initialize(node, props) {
     this.state = {
-      speed: 'NORMAL',
+      speed: 'PAUSE',
       showGroundTruth: false,
       showCandidate: false,
       resetData: false,
@@ -34,7 +35,8 @@ class PacGameContainer extends React.Component {
       total_samples: 100,
       testing: false,
       sampleError: "N/A",
-      testError: "N/A"
+      testError: "N/A",
+      setRefresh: false
     }
   }
 
@@ -47,7 +49,7 @@ class PacGameContainer extends React.Component {
   }
 
   refresh() {
-    console.log("refresh called")
+    this.setState({setRefresh: true})
   }
 
   pause() {
@@ -78,6 +80,12 @@ class PacGameContainer extends React.Component {
     });
   }
 
+  resetRefresh() {
+    this.setState((state, props) => {
+      return {setRefresh: false, testing: false}
+    });
+  }
+
   updateSampleError(errorString) {
     this.setState((state, props) => {
       return {sampleError: errorString}
@@ -97,7 +105,7 @@ class PacGameContainer extends React.Component {
       <div className='pac-game-container' {...props}>
         <Paper>
           <Grid container spacing={3}>
-            <Grid item container xs={2}>
+            {/* <Grid item container xs={2}>
               <Grid item xs={12} className='pac-game-step'>Play</Grid>
               <Grid item xs={12} className='pac-game-step'>Sampling</Grid>
               <Grid item xs={12} className='pac-game-step'>Automated Models</Grid>
@@ -105,23 +113,21 @@ class PacGameContainer extends React.Component {
               <Grid item xs={12} className='pac-game-step'>Why does ML fail?</Grid>
               <Grid item xs={12} className='pac-game-step'>How does Viz fix this?</Grid>
             </Grid>
-            <Grid item xs={10}>
-              <Grid container spaci
-              ng={4}>
+            <Grid item xs={10}> */}
+            <Grid item xs={1}/>
+            <Grid item xs={11}>
+              <Grid container spacing={4}>
                 <Grid item xs={12}>
-                  <Button onClick={this.refresh.bind(this)}>re</Button>
-                  <Button onClick={this.pause.bind(this)}><Pause/></Button>
-                  <Button onClick={this.play.bind(this)}><PlayArrow/></Button>
-                  <Button onClick={this.faster.bind(this)}><SkipNext/></Button>
+                  <Button onClick={this.refresh.bind(this)}><Refresh/></Button>
+                  <Button className={this.state.speed === 'PAUSE' ? 'selectedButton' : null} onClick={this.pause.bind(this)}><Pause/></Button>
+                  <Button className={this.state.speed === 'NORMAL' ? 'selectedButton' : null} onClick={this.play.bind(this)}><PlayArrow/></Button>
+                  <Button className={this.state.speed === 'FASTER' ? 'selectedButton' : null} onClick={this.faster.bind(this)}><SkipNext/></Button>
                   <Button onClick={this.toggleTesting.bind(this)}>Test!</Button>
-                  <Button onClick={this.toggleGroundTruth.bind(this)}>Toggleshow</Button>
-                  <Button onClick={this.toggleCandidate.bind(this)}>cand</Button>
-                  <Button onClick={this.toggleCandidate.bind(this)}>cand</Button>
-                  <Button onClick={this.toggleCandidate.bind(this)}>cand</Button>
-                  <Button onClick={this.toggleCandidate.bind(this)}>cand</Button>
-                  <div>{this.state.n_samples} samples</div>
-                  <div>Sample Error: {this.state.sampleError}</div>
-                  <div>Test Error: {this.state.testError}</div>
+                  {/* <Button onClick={this.toggleGroundTruth.bind(this)}>Toggleshow</Button> */}
+                  {/* <Button onClick={this.toggleCandidate.bind(this)}>cand</Button> */}
+                  {/* <Button onClick={this.toggleCandidate.bind(this)}>cand</Button> */}
+                  {/* <Button onClick={this.toggleCandidate.bind(this)}>cand</Button> */}
+                  {/* <Button onClick={this.toggleCandidate.bind(this)}>cand</Button> */}
                 </Grid>
               </Grid>
               <Grid item xs={12}>
@@ -139,7 +145,14 @@ class PacGameContainer extends React.Component {
                   updateTestError={this.updateTestError.bind(this)}
                   incrementSamples={this.incrementSamples.bind(this)}
                   resetSamples={this.resetSamples.bind(this)}
+                  resetRefresh={this.resetRefresh.bind(this)}
+                  setRefresh={this.state.setRefresh}
                 />
+              </Grid>
+              <Grid item xs={12}>
+                <div>{this.state.n_samples} samples</div>
+                <div>Sample Error: {this.state.sampleError}</div>
+                <div>Test Error: {this.state.testError}</div>
               </Grid>
             </Grid>
           </Grid>
