@@ -2,7 +2,7 @@ const React = require('react');
 const D3Component = require('idyll-d3-component');
 const d3 = require('d3');
 
-const size = 600;
+import conf from './pac-conf';
 
 class PacScatter extends D3Component {
 
@@ -10,11 +10,11 @@ class PacScatter extends D3Component {
     if (speed === 'PAUSE') {
       return 10;
     } else if (speed === 'FASTER') {
-      return 250;
+      return conf.FAST_SPEED;
     } else if (speed === 'FINISH') {
-      return 10;
+      return conf.FINISH_SPEED;
     } else {
-      return 1500;
+      return conf.DEFAULT_SPEED;
     }
   }
 
@@ -150,12 +150,12 @@ class PacScatter extends D3Component {
   }
 
   update(props, oldProps) {
-    console.log("update called, props.setRefresh is ", props.setRefresh)
+    // console.log("update called, props.setRefresh is ", props.setRefresh)
     if (props.setRefresh) {
-      console.log("this.targetTrainDistribution is ", this.targetTrainDistribution)
+      // console.log("this.targetTrainDistribution is ", this.targetTrainDistribution)
       this.clearBrush.bind(this)()
       this.initializeDistributions.bind(this)();
-      console.log("after initialze, this.targetTrainDistribution is ", this.targetTrainDistribution)
+      // console.log("after initialze, this.targetTrainDistribution is ", this.targetTrainDistribution)
       this.eraseAllPoints.bind(this)()
       this.props.updateSampleError('N/A');
       this.props.resetRefresh();

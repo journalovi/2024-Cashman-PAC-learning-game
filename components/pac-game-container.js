@@ -2,11 +2,12 @@ const React = require('react');
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button';
-import PacScatter from './pac-scatter';
 import Refresh from '@material-ui/icons/Refresh';
 import Pause from '@material-ui/icons/Pause';
 import PlayArrow from '@material-ui/icons/PlayArrow';
 import SkipNext from '@material-ui/icons/SkipNext';
+
+import PacScatter from './pac-scatter';
 
 class PacGameContainer extends React.Component {
   constructor(props) {

@@ -2,6 +2,7 @@
 
 2023-07
 
+[] Fix Sample Error
 [] Rewrite the general text
 [] Add the FP etc to the scatterplot
 [] Add the confusion matrix + metrics to the scatterplot
