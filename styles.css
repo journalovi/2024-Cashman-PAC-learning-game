@@ -41,3 +41,12 @@
 .selectedButton {
   border: 2px solid black !important;
 }
+
+.evaluation-statistics .evaluation-accuracy {
+  text-align: center;
+}
+
+.evaluation-statistics .evaluation-cm-item {
+  text-align: left;
+  padding: 2em;
+}

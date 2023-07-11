@@ -12,6 +12,8 @@
   // author:"Dylan Cashman"
   // authorurl:"https://www.eecs.tufts.edu/~dcashm01/"
 
+[PacGameContainer fullWidth:true /]
+
 ## Introduction
 
 Machine Learning algorithms are becoming ubiquitous tools in the age of big data to aid in decision making and data analysis. 
@@ -108,7 +110,6 @@ Instead, a human in the loop, armed with appropriate visualizations and analytic
 
 
 // [FullWidth/]
-// [PacGameContainer fullWidth:true /]
 
 ## Further Reading
 
@@ -117,9 +118,9 @@ Instead, a human in the loop, armed with appropriate visualizations and analytic
 - *Principles of Risk Minimization for Learning Theory* by Vapnik
 - *On the Safety of Machine Learning: Cyber-Physical Systems, Decision Sciences, and Data Products* by Varshney and Alemzadeh
 
-[Fixed]
-  [PacGameContainer/]
-[/Fixed]
+// [Fixed]
+//   [PacGameContainer/]
+// [/Fixed]
 // [FullWidth]
 //   [PacGameContainer/]
 // [/FullWidth]

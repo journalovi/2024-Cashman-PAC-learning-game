@@ -295,19 +295,41 @@ class PacScatter extends D3Component {
   }
 
   calculateSampleError() {
-    // We only have rectangular hypotheses for now...
-
-
-    // if (this.props.targetTrainDistributionType === 'rectangle') {
-      // return this.calculateSampleErrorRectangle(this.state.candidateDistribution);
-    // } else if (this.props.targetTrainDistributionType === 'ellipse') {
-      // return this.calculateSampleErrorEllipse(this.state.candidateDistribution);
-    // }
-    return this.calculateSampleErrorRectangle(this.state.candidateDistribution);
-
+    // Here, we're going to actually calculate the full confusion matrix:
+    // TP, TN, FP, TN, Accuracy
+    accuracy = 0.0
+    tp = 0
+    tn = 0
+    fp = 0
+    fn = 0
+    if (totalSamples > 0 && boundingBox) {
+      for (let i = 0; i < totalSamples; i++) {
+        let datum = this.state.drawnPoints[i];
+        let predictedLabel = this.ptInRect(datum.x, datum.y, boundingBox);
+        console.log("datum is ", datum, ", boundingBox is ", boundingBox, " and predictedLabel is ", predictedLabel);
+        if (predictedLabel == datum.label) {
+          if (predictedLabel) {
+            tp++;
+          } else {
+            tn++;
+          }
+        } else {
+          if (predictedLabel) {
+            fp++;
+          } else {
+            fn++;
+          }
+        }
+      }
+      accuracy = (tp + tn) / (tp + tn + fp + fn)
+    }
   }
 
   calculateTestError() {
+    // Here, we're going to calculate the areas of the confusion matrix:
+    // TP, TN, FP, TN, Accuracy
+    // Where the confusion matrix is percentages
+
     if (this.props.targetTestDistributionType === 'rectangle') {
       return this.calculateErrorRectangle(this.state.candidateDistribution, this.targetTestDistribution);
     } else if (this.props.targetTestDistributionType === 'ellipse') {
@@ -318,7 +340,7 @@ class PacScatter extends D3Component {
 
   calculateSampleErrorRectangle(boundingBox) {
     const totalSamples = this.state.drawnPoints.length * 1.0;
-    // console.log("boundingBox is ", boundingBox, ", and this.targetTrainDistribution is ", this.targetTrainDistribution);
+    console.log("boundingBox is ", boundingBox, ", and this.targetTrainDistribution is ", this.targetTrainDistribution);
 
     if (totalSamples > 0 && boundingBox) {
       let incorrectSamples = 0.0;

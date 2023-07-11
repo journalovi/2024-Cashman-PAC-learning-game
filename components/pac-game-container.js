@@ -20,6 +20,20 @@ class PacGameContainer extends React.Component {
       n_samples: 0,
       total_samples: 100,
       testing: false,
+      sampleStatistics: {
+        'Accuracy': 0.0,
+        'tp': 0,
+        'tn': 0,
+        'fp': 0,
+        'fn': 0
+      },
+      testStatistics: {
+        'Accuracy': 0.0,
+        'tp': 0,
+        'tn': 0,
+        'fp': 0,
+        'fn': 0
+      },
       sampleError: "N/A",
       testError: "N/A"
     }
@@ -87,9 +101,9 @@ class PacGameContainer extends React.Component {
     });
   }
 
-  updateSampleError(errorString) {
+  updateSampleError(sampleStatistics) {
     this.setState((state, props) => {
-      return {sampleError: errorString}
+      return {sampleStatistics: sampleStatistics}
     });
   }
 
@@ -150,10 +164,41 @@ class PacGameContainer extends React.Component {
                   setRefresh={this.state.setRefresh}
                 />
               </Grid>
-              <Grid item xs={12}>
+              <Grid item xs={6}>
+                <div class='evaluation-statistics'>
+                  <Grid container space={2}>
+                    <Grid item xs={12}>
+                      <div class='evaluation-accuracy'>
+                        <span class='accuracy-span'>Accuracy</span>
+                      </div>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <div class='evaluation-cm-item true-positive'>
+                        TP: <span class='cm-value'>{this.state.sampleStatistics.tp}</span>
+                      </div>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <div class='evaluation-cm-item false-positive'>
+                        FP: <span class='cm-value'>{this.state.sampleStatistics.fp}</span>
+                      </div>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <div class='evaluation-cm-item false-negative'>
+                        FN: <span class='cm-value'>{this.state.sampleStatistics.fn}</span>
+                      </div>
+                    </Grid>
+                    <Grid item xs={6}>
+                      <div class='evaluation-cm-item true-negative'>
+                        TN: <span class='cm-value'>{this.state.sampleStatistics.tn}</span>
+                      </div>
+                    </Grid>
+                  </Grid>
+                </div>
                 <div>{this.state.n_samples} samples</div>
                 <div>Sample Error: {this.state.sampleError}</div>
                 <div>Test Error: {this.state.testError}</div>
+              </Grid>
+              <Grid item xs={6}>
               </Grid>
             </Grid>
           </Grid>
