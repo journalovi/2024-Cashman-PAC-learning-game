@@ -13,34 +13,43 @@ class PacGameContainer extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      speed: 'PAUSE',
+      speed: 'NORMAL',
       showGroundTruth: false,
       showCandidate: false,
       resetData: false,
       n_samples: 0,
       total_samples: 100,
       testing: false,
+      xAxisName: 'Weight (lbs)',
+      yAxisName: 'Height (feet)',
       sampleStatistics: {
-        'Accuracy': 0.0,
+        'accuracy': 0.0,
+        'error': 0.0,
         'tp': 0,
         'tn': 0,
         'fp': 0,
         'fn': 0
       },
       testStatistics: {
-        'Accuracy': 0.0,
+        'accuracy': 0.0,
+        'error': 0.0,
         'tp': 0,
         'tn': 0,
         'fp': 0,
         'fn': 0
       },
       sampleError: "N/A",
-      testError: "N/A"
+      testError: "N/A",
+      title: "Welcome to Blumer's Game!"
     }
 
   }
 
   initialize(node, props) {
+    this.resetState();
+  }
+
+  resetState() {
     this.state = {
       speed: 'PAUSE',
       showGroundTruth: false,
@@ -51,7 +60,22 @@ class PacGameContainer extends React.Component {
       testing: false,
       sampleError: "N/A",
       testError: "N/A",
-      setRefresh: false
+      xAxisName: null,
+      yAxisName: null,
+      sampleStatistics: {
+        'accuracy': 0.0,
+        'tp': 0,
+        'tn': 0,
+        'fp': 0,
+        'fn': 0
+      },
+      testStatistics: {
+        'accuracy': 0.0,
+        'tp': 0,
+        'tn': 0,
+        'fp': 0,
+        'fn': 0
+      }
     }
   }
 
@@ -64,6 +88,7 @@ class PacGameContainer extends React.Component {
   }
 
   refresh() {
+    this.resetState();
     this.setState({setRefresh: true})
   }
 
@@ -103,13 +128,14 @@ class PacGameContainer extends React.Component {
 
   updateSampleError(sampleStatistics) {
     this.setState((state, props) => {
+      console.log("updating SampleError with sampleStatistics", sampleStatistics)
       return {sampleStatistics: sampleStatistics}
     });
   }
 
-  updateTestError(errorString) {
+  updateTestError(testStatistics) {
     this.setState((state, props) => {
-      return {testError: errorString}
+      return {testStatistics: testStatistics}
     });
   }
 
@@ -119,6 +145,9 @@ class PacGameContainer extends React.Component {
     return (
       <div className='pac-game-container' {...props}>
         <Paper>
+          <Paper elevation={3} >
+            <div className='pac-game-message'>{this.state.title}</div>
+          </Paper>
           <Grid container spacing={3}>
             {/* <Grid item container xs={2}>
               <Grid item xs={12} className='pac-game-step'>Play</Grid>
@@ -162,43 +191,73 @@ class PacGameContainer extends React.Component {
                   resetSamples={this.resetSamples.bind(this)}
                   resetRefresh={this.resetRefresh.bind(this)}
                   setRefresh={this.state.setRefresh}
+                  xAxisName={this.state.xAxisName}
+                  yAxisName={this.state.yAxisName}
                 />
               </Grid>
-              <Grid item xs={6}>
-                <div class='evaluation-statistics'>
-                  <Grid container space={2}>
-                    <Grid item xs={12}>
-                      <div class='evaluation-accuracy'>
-                        <span class='accuracy-span'>Accuracy</span>
-                      </div>
+              <Grid container space={2}>
+                <Grid item xs={6}>
+                  <div className='evaluation-statistics evaluation-statistics-training'>
+                    <Grid container space={2}>
+                      <Grid item xs={12}>
+                        <div className='evaluation-accuracy'>
+                          <span className='accuracy-span'>Total Training Error: {this.state.sampleStatistics.error.toFixed(2)}%</span>
+                        </div>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <div className='evaluation-cm-item true-positive'>
+                          <span className='tooltip'>TP %:   <span className="tooltiptext">The percent of the samples seen in training that are correctly enclosed by the dragged square.</span></span><span className='cm-value'> {this.state.sampleStatistics.tp.toFixed(2)}%</span>
+                        </div>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <div className='evaluation-cm-item false-positive'>
+                          <span className='tooltip'>FP %:   <span className="tooltiptext">The percent of the samples seen in training that are in the dragged square, but shouldn't be.</span></span><span className='cm-value'> {this.state.sampleStatistics.fp.toFixed(2)}%</span>
+                        </div>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <div className='evaluation-cm-item false-negative'>
+                          <span className='tooltip'>FN %:   <span className="tooltiptext">The percent of the samples seen in training that are not in the dragged square, but should be.</span></span><span className='cm-value'> {this.state.sampleStatistics.fn.toFixed(2)}%</span>
+                        </div>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <div className='evaluation-cm-item true-negative'>
+                          <span className='tooltip'>TN %:   <span className="tooltiptext">The percent of the samples seen in training that are correctly not in the dragged square.</span></span><span className='cm-value'> {this.state.sampleStatistics.tn.toFixed(2)}%</span>
+                        </div>
+                      </Grid>
                     </Grid>
-                    <Grid item xs={6}>
-                      <div class='evaluation-cm-item true-positive'>
-                        TP: <span class='cm-value'>{this.state.sampleStatistics.tp}</span>
-                      </div>
+                  </div>
+                </Grid>
+                <Grid item xs={6}>
+                  <div className='evaluation-statistics evaluation-statistics-testing'>
+                    <Grid container space={2}>
+                      <Grid item xs={12}>
+                        <div className='evaluation-accuracy'>
+                          <span className='accuracy-span'>Total Testing Error: {this.state.testStatistics.error.toFixed(2)}%</span>
+                        </div>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <div className='evaluation-cm-item true-positive'>
+                          <span className='tooltip'>TP %:   <span className="tooltiptext">The percent of the full space that is true positives (the dark green area).</span></span><span className='cm-value'> {this.state.testStatistics.tp.toFixed(2)}%</span>
+                        </div>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <div className='evaluation-cm-item false-positive'>
+                          <span className='tooltip'>FP %:   <span className="tooltiptext">The percent of the full space that is false positives (the gray area).</span></span><span className='cm-value'> {this.state.testStatistics.fp.toFixed(2)}%</span>
+                        </div>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <div className='evaluation-cm-item false-negative'>
+                          <span className='tooltip'>FN %:   <span className="tooltiptext">The percent of the full space that is false negatives (the light green area).</span></span><span className='cm-value'> {this.state.testStatistics.fn.toFixed(2)}%</span>
+                        </div>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <div className='evaluation-cm-item true-negative'>
+                          <span className='tooltip'>TN %:   <span className="tooltiptext">The percent of the full space that is true negatives (the area out of either squar).</span></span><span className='cm-value'> {this.state.testStatistics.tn.toFixed(2)}%</span>
+                        </div>
+                      </Grid>
                     </Grid>
-                    <Grid item xs={6}>
-                      <div class='evaluation-cm-item false-positive'>
-                        FP: <span class='cm-value'>{this.state.sampleStatistics.fp}</span>
-                      </div>
-                    </Grid>
-                    <Grid item xs={6}>
-                      <div class='evaluation-cm-item false-negative'>
-                        FN: <span class='cm-value'>{this.state.sampleStatistics.fn}</span>
-                      </div>
-                    </Grid>
-                    <Grid item xs={6}>
-                      <div class='evaluation-cm-item true-negative'>
-                        TN: <span class='cm-value'>{this.state.sampleStatistics.tn}</span>
-                      </div>
-                    </Grid>
-                  </Grid>
-                </div>
-                <div>{this.state.n_samples} samples</div>
-                <div>Sample Error: {this.state.sampleError}</div>
-                <div>Test Error: {this.state.testError}</div>
-              </Grid>
-              <Grid item xs={6}>
+                  </div>
+                </Grid>
               </Grid>
             </Grid>
           </Grid>

@@ -124,14 +124,16 @@ class PacScatter extends D3Component {
 
   initialize(node, props) {
     // Some code based on http://bl.ocks.org/weiglemc/6185069
-    this.margin = {top: 20, right: 20, bottom: 30, left: 40};
-    this.width = 960 - this.margin.left - this.margin.right;
-    this.height = 500 - this.margin.top - this.margin.bottom;
+    this.margin = conf.margin;
+    this.width = conf.width - this.margin.left - this.margin.right;
+    this.height = conf.height - this.margin.top - this.margin.bottom;
         
     this.svg = d3.select(node).append('svg');
     this.svg
       .style('width', this.width + this.margin.left + this.margin.right)
       .style('height', this.height + this.margin.top + this.margin.bottom)
+      .style('display', 'block')
+      .style('margin', 'auto')
       .append("g")
       .attr("transform", "translate(" + this.margin.left + "," + this.margin.top + ")");
 
@@ -150,14 +152,10 @@ class PacScatter extends D3Component {
   }
 
   update(props, oldProps) {
-    // console.log("update called, props.setRefresh is ", props.setRefresh)
     if (props.setRefresh) {
-      // console.log("this.targetTrainDistribution is ", this.targetTrainDistribution)
       this.clearBrush.bind(this)()
       this.initializeDistributions.bind(this)();
-      // console.log("after initialze, this.targetTrainDistribution is ", this.targetTrainDistribution)
       this.eraseAllPoints.bind(this)()
-      this.props.updateSampleError('N/A');
       this.props.resetRefresh();
     }
     this.drawTargetDistribution(props.testing);
@@ -201,12 +199,9 @@ class PacScatter extends D3Component {
   // }
 
   brushed() {
-    console.log("brushed called, and d3.event.type is ", d3.event.type)
     if (d3.event.type === 'end' && d3.event.selection) {
       const [[x0, y0], [x1, y1]] = d3.event.selection;
       // Set candidate rectangle to this boundary.
-      console.log("this is ", this)
-      console.log("this.state is ", this.state)
       const newBoundingBox = {
         x: {
           min: this.xScale.invert(x0),
@@ -217,8 +212,8 @@ class PacScatter extends D3Component {
           max: this.yScale.invert(y0)
         }
       }
-      console.log("newBoundingBox is ", newBoundingBox);
       this.setState({ candidateDistribution: newBoundingBox });
+      this.props.updateSampleError(this.calculateSampleError());
     }
  }
 
@@ -297,16 +292,19 @@ class PacScatter extends D3Component {
   calculateSampleError() {
     // Here, we're going to actually calculate the full confusion matrix:
     // TP, TN, FP, TN, Accuracy
-    accuracy = 0.0
-    tp = 0
-    tn = 0
-    fp = 0
-    fn = 0
+    const boundingBox = this.state.candidateDistribution;
+    const totalSamples = this.state.drawnPoints.length * 1.0;
+    let accuracy = 0.0
+    let error = 0.0
+    let tp = 0
+    let tn = 0
+    let fp = 0
+    let fn = 0
     if (totalSamples > 0 && boundingBox) {
       for (let i = 0; i < totalSamples; i++) {
         let datum = this.state.drawnPoints[i];
         let predictedLabel = this.ptInRect(datum.x, datum.y, boundingBox);
-        console.log("datum is ", datum, ", boundingBox is ", boundingBox, " and predictedLabel is ", predictedLabel);
+        // console.log("datum is ", datum, ", boundingBox is ", boundingBox, " and predictedLabel is ", predictedLabel);
         if (predictedLabel == datum.label) {
           if (predictedLabel) {
             tp++;
@@ -321,8 +319,15 @@ class PacScatter extends D3Component {
           }
         }
       }
-      accuracy = (tp + tn) / (tp + tn + fp + fn)
+      // We divide all the tp, etc. by the number of samples so we get rates, so it is comparable with true samples
+      tp = (100 * tp) / totalSamples
+      tn = (100 * tn) / totalSamples
+      fp = (100 * fp) / totalSamples
+      fn = (100 * fn) / totalSamples
+      accuracy = (100 * (tp + tn)) / (tp + tn + fp + fn)
+      error = 100 - accuracy
     }
+    return { tp, tn, fp, fn, accuracy, error }
   }
 
   calculateTestError() {
@@ -338,54 +343,26 @@ class PacScatter extends D3Component {
 
   }
 
-  calculateSampleErrorRectangle(boundingBox) {
-    const totalSamples = this.state.drawnPoints.length * 1.0;
-    console.log("boundingBox is ", boundingBox, ", and this.targetTrainDistribution is ", this.targetTrainDistribution);
-
-    if (totalSamples > 0 && boundingBox) {
-      let incorrectSamples = 0.0;
-      for (let i = 0; i < totalSamples; i++) {
-        let datum = this.state.drawnPoints[i];
-        let predictedLabel = this.ptInRect(datum.x, datum.y, boundingBox);
-        // console.log("datum is ", datum, ", boundingBox is ", boundingBox, " and predictedLabel is ", predictedLabel);
-        if (predictedLabel !== datum.label) {
-          incorrectSamples++;
-        }
-      }
-      // console.log("incorrectSamples is ", incorrectSamples, " and totalSamples is ", totalSamples);
-      // return incorrectSamples / totalSamples;
-      return `${incorrectSamples} out of ${totalSamples} : ${(incorrectSamples / totalSamples).toPrecision(2)}`
-    } else {
-      // return 0.0;
-      return 'N/A'
-    }
-  }
-
-  calculateSampleErrorEllipse(boundingBox) {
-    const totalSamples = this.state.drawnPoints.length * 1.0;
-
-    if (totalSamples > 0 && boundingBox) {
-      let incorrectSamples = 0.0;
-      for (let i = 0; i < totalSamples; i++) {
-        let datum = this.state.drawnPoints[i];
-        let predictedLabel = this.ptInEllipse(datum.x, datum.y, boundingBox);
-        if (predictedLabel !== datum.label) {
-          incorrectSamples++;
-        }
-      }
-      return incorrectSamples / totalSamples;
-    } else {
-      return 0.0;
-    }
-  }
-
   calculateErrorRectangle(candidateDistribution, targetBoundingBox) {
     // error = area of both rectangles minus 2 * overlap.
     const intersectionRectArea = this.calculateIntersectionRectArea(targetBoundingBox, candidateDistribution);
     const candidateBoxArea = (candidateDistribution.x.max - candidateDistribution.x.min) * (candidateDistribution.y.max - candidateDistribution.y.min);
     const targetBoxArea = (targetBoundingBox.x.max - targetBoundingBox.x.min) * (targetBoundingBox.y.max - targetBoundingBox.y.min);
+    // TP = area of intersection of areas inside boxes
+    // FP = area outside ground truth and inside candidate box = candidateBoxArea - intersection
+    // FN = area inside ground truth but outside candidate box = targetBoxArea - intersection
+    // TN = area of intersection of areas outside boxes = Total Area - (TP + FN + FP)
 
-    return (candidateBoxArea + targetBoxArea - (2.0 * intersectionRectArea)).toPrecision(2);
+    let stats = {
+      'tp': intersectionRectArea * 100,
+      'fp': (candidateBoxArea - intersectionRectArea) * 100,
+      'fn': (targetBoxArea - intersectionRectArea) * 100
+    }
+    stats['tn'] = 100.0 - (stats['tp'] + stats['fp'] + stats['fn']) // assumes full area is 1.0
+    stats['accuracy'] = stats['tp'] + stats['tn'] // assumes full area is 1.0
+    stats['error'] = 100.0 - stats['accuracy']
+
+    return stats
   }
 
   calculateErrorEllipse() {

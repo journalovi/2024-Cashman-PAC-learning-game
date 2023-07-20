@@ -10,6 +10,9 @@
   }
 }
 
+* {
+  font-family: sans-serif;
+}
 /* Make the blog format use more space for now */
 /* .idyll-text-container { */
   /* max-width: 1000px; */
@@ -48,5 +51,73 @@
 
 .evaluation-statistics .evaluation-cm-item {
   text-align: left;
-  padding: 2em;
+  padding: 0.5em;
+}
+
+.tooltip {
+  position: relative;
+  display: inline-block;
+  border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
+}
+
+/* Tooltip text */
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 120px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  padding: 5px 0;
+  border-radius: 6px;
+ 
+  position: absolute;
+  z-index: 1;
+  left: 0;
+  bottom: 2em;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+}
+
+.callout {
+  padding: 0 10em 0 10em;
+}
+
+.callout-definition {
+  padding: 5em 10em 5em 10em;
+  margin-bottom: 5em;
+  background: lightblue;
+  border-radius: 2em;
+  border: 1em gray;
+  font-family: Georgia, serif;
+}
+
+.aside {
+  width: 500px;
+  right: 0px;
+  left: 700px;
+}
+
+.article-header {
+  width: 800px;
+}
+
+.idyll-text-container {
+  max-width: 700px;
+}
+
+.pac-game-message {
+  text-align: center;
+  padding: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+.evaluation-statistics-training {
+  border-right: 2px solid gray;
+}
+
+.evaluation-statistics-testing {
+  border-left: 2px solid lightgray;  
 }
