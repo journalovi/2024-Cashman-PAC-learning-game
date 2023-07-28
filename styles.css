@@ -41,6 +41,32 @@
   border-color: blue;
 }
 
+.pac-game-container .candidate-distribution-t {
+  fill: yellow !important;
+  color: yellow !important;
+  opacity: 0.3 !important;
+  border-color: yellow !important;
+}
+
+.pac-game-container .candidate-distribution-t-text {
+  color: brown !important;
+  fill: brown !important;
+}
+
+.pac-game-container .candidate-distribution-tprime-text {
+  color: purple !important;
+  fill: purple !important;
+}
+
+.pac-game-container .candidate-distribution-tprime {
+  fill: violet !important;
+  color: violet !important;
+  opacity: 0.15 !important;
+  border-color: violet !important;
+  border-style: dashed !important;
+  border-radius: 5px !important;
+}
+
 .selectedButton {
   border: 2px solid black !important;
 }
@@ -120,4 +146,54 @@
 
 .evaluation-statistics-testing {
   border-left: 2px solid lightgray;  
+}
+
+.rotate90 {
+  transform: rotate(90deg);
+}
+
+.section-divider {
+  page-break-after: always;
+  margin-top: 10vh;
+  margin-bottom: 40vh;
+  text-align: center;
+}
+
+.extraspace {
+  margin-top: 40vh;
+}
+
+.section-divider-arrow {
+  animation: bounce 8s;
+  animation-delay: 5s;
+  animation-iteration-count: 5;
+}
+
+@keyframes bounce {
+  0%,
+  10%,
+  20%,
+  50%,
+  75%,
+  100% {
+    transform: translateY(0);
+  }
+  5% {
+    transform: translateY(-20px);
+  }
+  15% {
+    transform: translateY(-12px);
+  }
+}
+
+.game-changer {
+  margin-bottom: 3vh;
+}
+
+.fullWidth {
+  background: white;
+  margin-top: 10vh;
+  margin-bottom: 10vh;
+  position: relative;
+  z-index: 100;
 }

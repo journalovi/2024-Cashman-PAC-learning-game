@@ -3,6 +3,7 @@ const D3Component = require('idyll-d3-component');
 const d3 = require('d3');
 
 import conf from './pac-conf';
+import tenSamplesData from './ten-samples-data';
 
 class PacScatter extends D3Component {
 
@@ -37,7 +38,8 @@ class PacScatter extends D3Component {
     this.initializeDistributions.bind(this)();
   }
 
-  initializeDistributions() {
+  initializeDistributions(isStatic=false) {
+
     if (this.props.targetTrainDistribution) {
       this.targetTrainDistribution = this.props.targetTrainDistribution;
     } else {
@@ -53,17 +55,20 @@ class PacScatter extends D3Component {
         this.targetTestDistribution = this.generateRandomRect(this.outerBounds);
       }
     }
-
-    if (this.props.targetTrainDistributionType === 'ellipse') {
-      this.generatedTrainData = this.generateUniformEllipseData(this.targetTrainDistribution, this.outerBounds, this.props.total_samples)
+    if (isStatic) {
+      this.generatedTrainData = tenSamplesData.samples;
     } else {
-      this.generatedTrainData = this.generateUniformRectData(this.targetTrainDistribution, this.outerBounds, this.props.total_samples)  
-    }
+      if (this.props.targetTrainDistributionType === 'ellipse') {
+        this.generatedTrainData = this.generateUniformEllipseData(this.targetTrainDistribution, this.outerBounds, this.props.total_samples)
+      } else {
+        this.generatedTrainData = this.generateUniformRectData(this.targetTrainDistribution, this.outerBounds, this.props.total_samples)  
+      }
 
-    if (this.props.targetTestDistributionType === 'ellipse') {
-      this.generatedTestData = this.generateUniformEllipseData(this.targetTestDistribution, this.outerBounds, this.props.total_samples)
-    } else {
-      this.generatedTestData = this.generateUniformRectData(this.targetTestDistribution, this.outerBounds, this.props.total_samples)  
+      if (this.props.targetTestDistributionType === 'ellipse') {
+        this.generatedTestData = this.generateUniformEllipseData(this.targetTestDistribution, this.outerBounds, this.props.total_samples)
+      } else {
+        this.generatedTestData = this.generateUniformRectData(this.targetTestDistribution, this.outerBounds, this.props.total_samples)  
+      }
     }
 
     this.setState({data: this.generatedTrainData});
@@ -118,7 +123,6 @@ class PacScatter extends D3Component {
     this.brushG = React.createRef();
 
     // JAVASCRIPT IS AWFUL
-    // IS THERE SOMETHING BIGGER THAN CAPS?
     this.animatePoints = this.animatePoints.bind(this);
   }
 
@@ -130,8 +134,8 @@ class PacScatter extends D3Component {
         
     this.svg = d3.select(node).append('svg');
     this.svg
-      .style('width', this.width + this.margin.left + this.margin.right)
-      .style('height', this.height + this.margin.top + this.margin.bottom)
+      .style('width', this.width + this.margin.left + this.margin.right + 'px')
+      .style('height', this.height + this.margin.top + this.margin.bottom + 'px')
       .style('display', 'block')
       .style('margin', 'auto')
       .append("g")
@@ -154,21 +158,114 @@ class PacScatter extends D3Component {
   update(props, oldProps) {
     if (props.setRefresh) {
       this.clearBrush.bind(this)()
-      this.initializeDistributions.bind(this)();
-      this.eraseAllPoints.bind(this)()
+      if (!(props.staticDataset && oldProps.staticDataset)) {
+        // We don't want to reset the dataset if its just going from static to static
+        this.initializeDistributions.bind(this)(props.staticDataset);
+        this.eraseAllPoints.bind(this)()        
+      }
       this.props.resetRefresh();
     }
-    this.drawTargetDistribution(props.testing);
-    this.drawCandidateDistribution(props.showCandidate);
-    if (this.props.toggledClosestBounds) {
-      this.setClosestBounds.bind(this)();
-    }
-    if (this.props.toggledFurthestBounds) {
-      this.setFurthestBounds.bind(this)();
-    }
-    if (this.props.toggledMaxMarginBounds) {
-      this.setMaxMarginBounds.bind(this)();
-    }
+    this.svg.selectAll(".candidate-distribution").remove();
+
+    setTimeout(() => {
+      // Ugh.  I have async leaking all over this code.  Sometimes it tries
+      // to render the box before the data is ready, and it just doesn't draw it.
+      // Maybe setTimeout will make it wait.
+      let boundingBox = null;
+      let targetBoundingBox = null;
+      if (this.props.toggledClosestBounds) {
+        console.log("before calculating the bounding box, the drawn points are ", this.state.drawnPoints)
+        boundingBox = this.getClosestBounds.bind(this)();
+        // we only need this for the proof so I'll hard code it here
+        targetBoundingBox = { x: {}, y: {}};
+        targetBoundingBox['x']['min'] = boundingBox['x']['min'] - 0.1;
+        targetBoundingBox['x']['max'] = boundingBox['x']['max'] + 0.1;
+        targetBoundingBox['y']['min'] = boundingBox['y']['min'] - 0.1;
+        targetBoundingBox['y']['max'] = boundingBox['y']['max'] + 0.1;
+        this.setState({candidateDistribution: boundingBox})
+        console.log("IN HERE, boundingBox is ", boundingBox)
+        console.log("IN HERE, targetBoundingBox is ", targetBoundingBox)
+      }
+      if (this.props.toggledFurthestBounds) {
+        boundingBox = this.getFurthestBounds.bind(this)();
+        this.setState({candidateDistribution: boundingBox})
+      }
+      if (this.props.toggledMaxMarginBounds) {
+        boundingBox = this.getMaxMarginBounds.bind(this)();
+        this.setState({candidateDistribution: boundingBox})
+      }
+
+      this.drawTargetDistribution(props.testing || props.showGroundTruth, targetBoundingBox);
+      this.drawCandidateDistribution(props.showCandidate, boundingBox);
+
+
+      if (this.props.showTopStrip || this.props.showAllStrips) {
+        const topStripBoundingBox = { x: {}, y: {}};
+        topStripBoundingBox['x']['min'] = boundingBox['x']['min'] - 0.1;
+        topStripBoundingBox['x']['max'] = boundingBox['x']['max'] + 0.1;
+        topStripBoundingBox['y']['min'] = boundingBox['y']['max'];
+        topStripBoundingBox['y']['max'] = boundingBox['y']['max'] + 0.1;
+        this.drawCandidateDistribution(this.props.showTopStrip || this.props.showAllStrips, topStripBoundingBox, true, false, true)
+
+        const topPrimeBoundingBox = { x: {}, y: {}};
+        topPrimeBoundingBox['x']['min'] = boundingBox['x']['min'] - 0.1;
+        topPrimeBoundingBox['x']['max'] = boundingBox['x']['max'] + 0.1;
+        topPrimeBoundingBox['y']['min'] = boundingBox['y']['max'] - 0.05;
+        topPrimeBoundingBox['y']['max'] = boundingBox['y']['max'] + 0.1;
+        this.drawCandidateDistribution(this.props.showTopStrip || this.props.showAllStrips, topPrimeBoundingBox, false, true, true)
+      }
+
+      if (this.props.showAllStrips) {
+        const rightStripBoundingBox = { x: {}, y: {}};
+        rightStripBoundingBox['x']['min'] = boundingBox['x']['max'];
+        rightStripBoundingBox['x']['max'] = boundingBox['x']['max'] + 0.1;
+        rightStripBoundingBox['y']['min'] = boundingBox['y']['min'] - 0.1;
+        rightStripBoundingBox['y']['max'] = boundingBox['y']['max'] + 0.1;
+        this.drawCandidateDistribution(this.props.showAllStrips, rightStripBoundingBox, true, false)
+
+        const rightPrimeBoundingBox = { x: {}, y: {}};
+        rightPrimeBoundingBox['x']['min'] = boundingBox['x']['max'] - 0.05;
+        rightPrimeBoundingBox['x']['max'] = boundingBox['x']['max'] + 0.1;
+        rightPrimeBoundingBox['y']['min'] = boundingBox['y']['min'] - 0.1;
+        rightPrimeBoundingBox['y']['max'] = boundingBox['y']['max'] + 0.1;
+        this.drawCandidateDistribution(this.props.showAllStrips, rightPrimeBoundingBox, false, true)
+
+        const bottomStripBoundingBox = { x: {}, y: {}};
+        bottomStripBoundingBox['x']['min'] = boundingBox['x']['min'] - 0.1;
+        bottomStripBoundingBox['x']['max'] = boundingBox['x']['max'] + 0.1;
+        bottomStripBoundingBox['y']['min'] = boundingBox['y']['min'] - 0.1;
+        bottomStripBoundingBox['y']['max'] = boundingBox['y']['min'];
+        this.drawCandidateDistribution(this.props.showAllStrips, bottomStripBoundingBox, true, false)
+
+        const bottomPrimeBoundingBox = { x: {}, y: {}};
+        bottomPrimeBoundingBox['x']['min'] = boundingBox['x']['min'] - 0.1;
+        bottomPrimeBoundingBox['x']['max'] = boundingBox['x']['max'] + 0.1;
+        bottomPrimeBoundingBox['y']['min'] = boundingBox['y']['min'] - 0.1;
+        bottomPrimeBoundingBox['y']['max'] = boundingBox['y']['min'] + 0.05;
+        this.drawCandidateDistribution(this.props.showAllStrips, bottomPrimeBoundingBox, false, true)
+
+        const leftStripBoundingBox = { x: {}, y: {}};
+        leftStripBoundingBox['x']['min'] = boundingBox['x']['min'] - 0.1;
+        leftStripBoundingBox['x']['max'] = boundingBox['x']['min'];
+        leftStripBoundingBox['y']['min'] = boundingBox['y']['min'] - 0.1;
+        leftStripBoundingBox['y']['max'] = boundingBox['y']['max'] + 0.1;
+        this.drawCandidateDistribution(this.props.showAllStrips, leftStripBoundingBox, true, false)
+
+        const leftPrimeBoundingBox = { x: {}, y: {}};
+        leftPrimeBoundingBox['x']['min'] = boundingBox['x']['min'] - 0.1;
+        leftPrimeBoundingBox['x']['max'] = boundingBox['x']['min'] + 0.05;
+        leftPrimeBoundingBox['y']['min'] = boundingBox['y']['min'] - 0.1;
+        leftPrimeBoundingBox['y']['max'] = boundingBox['y']['max'] + 0.1;
+        this.drawCandidateDistribution(this.props.showAllStrips, leftPrimeBoundingBox, false, true)
+      }
+    }, 200);
+
+
+    // if (this.props.showAllStrips) {
+    //   this.drawCandidateDistribution(this.props.showAllStrips, topStripBoundingBox, true, true)
+    //   this.drawCandidateDistribution(this.props.showAllStrips, topStripBoundingBox, true, true)
+    //   this.drawCandidateDistribution(this.props.showAllStrips, topStripBoundingBox, true, true)
+    // }
 
     if (!oldProps.testing && props.testing) {
       // We've switched from training to testing
@@ -178,8 +275,8 @@ class PacScatter extends D3Component {
           this.eraseAllPoints();
 
           this.animatePoints('FINISH');
-          this.drawTargetDistribution(this.props.testing);
-          this.drawCandidateDistribution(this.props.showCandidate);
+          this.drawTargetDistribution(props.testing || props.showGroundTruth);
+          this.drawCandidateDistribution(props.showCandidate);
         }
       )    
     }
@@ -252,33 +349,37 @@ class PacScatter extends D3Component {
   }
 
   drawNextPoint() {
-    const datum = this.state.dataQueue.pop();
-    this.setState((state, props) => { return { drawnPoints: state.drawnPoints.concat([datum]) } },
-      () => { 
-        this.props.incrementSamples();
-        if (this.props.testing) {
-          this.props.updateTestError(this.calculateTestError())
-        } else {
-          this.props.updateSampleError(this.calculateSampleError())
+    if (this.props.generatePoints) {
+      const datum = this.state.dataQueue.pop();
+      this.setState((state, props) => { return { drawnPoints: state.drawnPoints.concat([datum]) } },
+        () => { 
+          this.props.incrementSamples();
+          if (this.props.testing) {
+            this.props.updateTestError(this.calculateTestError())
+          } else {
+            this.props.updateSampleError(this.calculateSampleError())
+          }
         }
-      }
-    );
+      );
 
-    this.svg.append("circle")
-      .attr("class", "dot")
-      .attr("cx", this.xMap(datum))
-      .attr("cy", this.yMap(datum))
-      .style("fill", this.cValue(datum)) 
-      .attr("r", 0.5)
-      .transition()
-      .duration(1000)
-      .attr("r", 5.5)
-      .transition()
-      .duration(1000)
-      .attr("r", 3.5);
+      this.svg.append("circle")
+        .attr("class", "dot")
+        .attr("cx", this.xMap(datum))
+        .attr("cy", this.yMap(datum))
+        .style("fill", this.cValue(datum)) 
+        .attr("r", 0.5)
+        .transition()
+        .duration(1000)
+        .attr("r", 5.5)
+        .transition()
+        .duration(1000)
+        .attr("r", 3.5);
+    }
   }
 
   drawAllPoints() {
+    this.setState({drawnPoints: this.state.data})
+
     this.svg.selectAll(".dot")
       .data(this.state.data)
       .enter().append("circle")
@@ -304,7 +405,6 @@ class PacScatter extends D3Component {
       for (let i = 0; i < totalSamples; i++) {
         let datum = this.state.drawnPoints[i];
         let predictedLabel = this.ptInRect(datum.x, datum.y, boundingBox);
-        // console.log("datum is ", datum, ", boundingBox is ", boundingBox, " and predictedLabel is ", predictedLabel);
         if (predictedLabel == datum.label) {
           if (predictedLabel) {
             tp++;
@@ -377,39 +477,63 @@ class PacScatter extends D3Component {
     return overlapArea
   }
 
-  drawTargetDistribution(forceDraw=false) {
+  drawTargetDistribution(forceDraw=false, targetDistribution=null) {
+    console.log("in drawTargetDistribution, forceDraw is ", forceDraw, "and targetDistribution is ", targetDistribution, " also, this.props.targetTrainDistributionType is ", this.props.targetTrainDistributionType)
     if (this.props.targetTrainDistributionType === 'rectangle') {
-      this.drawTargetDistributionRectangle(forceDraw);
+      this.drawTargetDistributionRectangle(forceDraw, targetDistribution);
     } else if (this.props.targetTrainDistributionType === 'ellipse') {
       this.drawTargetDistributionEllipse(forceDraw);
     }
   }
 
-  drawCandidateDistribution(forceDraw=false) {
-    this.svg.selectAll(".candidate-distribution").remove();
-    if (forceDraw && this.state.candidateDistribution) {
+  drawCandidateDistribution(forceDraw=false, candidateDistribution=null, tstrip=false, tprimestrip=false, annotate=false) {
+    const dist = candidateDistribution || this.state.candidateDistribution;
+    console.log("forceDraw is ", forceDraw, " tstrip is ", tstrip, " tprimestrip is ", tprimestrip, "candidate dist is ", dist)
+    if (forceDraw && dist) {
+      const x = this.xScale(dist.x.min);
+      const y = this.yScale(dist.y.max);
+      const width = this.xScale(dist.x.max) - this.xScale(dist.x.min);
+      const height = Math.abs(this.yScale(dist.y.min) - this.yScale(dist.y.max));
+      let className = "rect candidate-distribution";
+      if (tstrip) {
+        className = className + " candidate-distribution-t";
+        if (annotate) {
+          this.svg.append("text")
+            .attr("class", "candidate-distribution candidate-distribution-t-text")
+            .attr("x", x + width + 5)
+            .attr("y", y)
+            .html("T'")
+        }
+      } else if (tprimestrip) {
+        className = className + " candidate-distribution-tprime";
+        if (annotate) {
+          this.svg.append("text")
+            .attr("class", "candidate-distribution candidate-distribution-tprime-text")
+            .attr("x", x + width + 5)
+            .attr("y", y + height)
+            .html("T")
+        }
+      }
+      console.log("about to draw a rect at (", x, ",", y, ")  with width ", width, "and height ", height, " and class", className)
       this.svg.append("rect")
-        .attr("class", "rect candidate-distribution")
-        .attr("x", this.xScale(this.state.candidateDistribution.x.min))
-        .attr("y", this.yScale(this.state.candidateDistribution.y.max))
-        .attr("width", this.xScale(this.state.candidateDistribution.x.max) - this.xScale(this.state.candidateDistribution.x.min))
-        .attr("height", this.yScale(this.state.candidateDistribution.y.min) - this.yScale(this.state.candidateDistribution.y.max))
+        .attr("class", className)
+        .attr("x", x)
+        .attr("y", y)
+        .attr("width", width)
+        .attr("height", height)
     }
   }
 
-  drawTargetDistributionRectangle(forceDraw=false) {
+  drawTargetDistributionRectangle(forceDraw=false, targetDistribution=null) {
     this.svg.selectAll(".target-distribution").remove();
+    const dist = targetDistribution || this.targetTrainDistribution;
     if (forceDraw) {
       this.svg.append("rect")
         .attr("class", "rect target-distribution")
-        .attr("x", this.xScale(this.targetTrainDistribution.x.min))
-        .attr("y", this.yScale(this.targetTrainDistribution.y.max))
-        .attr("width", this.xScale(this.targetTrainDistribution.x.max) - this.xScale(this.targetTrainDistribution.x.min))
-        .attr("height", this.yScale(this.targetTrainDistribution.y.min) - this.yScale(this.targetTrainDistribution.y.max))
-        // .attr("fill-opacity", 0)
-        // .transition()
-        // .duration(1000)
-        // .attr("fill-opacity", 0.5)
+        .attr("x", this.xScale(dist.x.min))
+        .attr("y", this.yScale(dist.y.max))
+        .attr("width", this.xScale(dist.x.max) - this.xScale(dist.x.min))
+        .attr("height", this.yScale(dist.y.min) - this.yScale(dist.y.max))
     }
   }
 
@@ -425,11 +549,12 @@ class PacScatter extends D3Component {
     }
   }
 
-  setClosestBounds() {
-    const x0 = d3.min(this.drawnPoints.select((d) => d.label), (d) => d.x)
-    const x1 = d3.max(this.drawnPoints.select((d) => d.label), (d) => d.x)
-    const y0 = d3.max(this.drawnPoints.select((d) => d.label), (d) => d.y)
-    const y1 = d3.min(this.drawnPoints.select((d) => d.label), (d) => d.y)
+  getClosestBounds() {
+    console.log("in closest bounds, this.state.drawnPoints is ", this.state.drawnPoints)
+    const x0 = d3.min(this.state.drawnPoints.filter((d) => d.label), (d) => d.x)
+    const x1 = d3.max(this.state.drawnPoints.filter((d) => d.label), (d) => d.x)
+    const y0 = d3.min(this.state.drawnPoints.filter((d) => d.label), (d) => d.y)
+    const y1 = d3.max(this.state.drawnPoints.filter((d) => d.label), (d) => d.y)
     const boundingBox = {
       x: {
         min: x0,
@@ -440,15 +565,19 @@ class PacScatter extends D3Component {
         max: y1
       }
     }
-
-    this.setState({candidateDistribution: boundingBox});
+    return boundingBox;
   }
 
-  setFurthestBounds() {
-    const x0 = d3.max(this.drawnPoints.select((d) => !d.label), (d) => d.x)
-    const x1 = d3.min(this.drawnPoints.select((d) => !d.label), (d) => d.x)
-    const y0 = d3.min(this.drawnPoints.select((d) => !d.label), (d) => d.y)
-    const y1 = d3.max(this.drawnPoints.select((d) => !d.label), (d) => d.y)
+  getFurthestBounds() {
+    const groundx0 = d3.min(this.state.drawnPoints.filter((d) => d.label), (d) => d.x)
+    const groundx1 = d3.max(this.state.drawnPoints.filter((d) => d.label), (d) => d.x)
+    const groundy0 = d3.min(this.state.drawnPoints.filter((d) => d.label), (d) => d.y)
+    const groundy1 = d3.max(this.state.drawnPoints.filter((d) => d.label), (d) => d.y)
+
+    const x0 = d3.max(this.state.drawnPoints.filter((d) => !d.label).filter((d) => (d.x <= groundx0)), (d) => d.x)
+    const x1 = d3.min(this.state.drawnPoints.filter((d) => !d.label).filter((d) => (d.x >= groundx1)), (d) => d.x)
+    const y0 = d3.max(this.state.drawnPoints.filter((d) => !d.label).filter((d) => (d.y <= groundy0)), (d) => d.y)
+    const y1 = d3.min(this.state.drawnPoints.filter((d) => !d.label).filter((d) => (d.y >= groundy1)), (d) => d.y)
     const boundingBox = {
       x: {
         min: x0,
@@ -460,14 +589,25 @@ class PacScatter extends D3Component {
       }
     }
 
-    this.setState({candidateDistribution: boundingBox});
+    return boundingBox;
   }
 
-  setMaxMarginBounds() {
-    const x0 = (d3.min(this.drawnPoints.select((d) => d.label), (d) => d.x) + d3.max(this.drawnPoints.select((d) => !d.label), (d) => d.x)) / 2.0
-    const x1 = (d3.max(this.drawnPoints.select((d) => d.label), (d) => d.x) + d3.min(this.drawnPoints.select((d) => !d.label), (d) => d.x)) / 2.0
-    const y0 = (d3.max(this.drawnPoints.select((d) => d.label), (d) => d.y) + d3.min(this.drawnPoints.select((d) => !d.label), (d) => d.y)) / 2.0
-    const y1 = (d3.min(this.drawnPoints.select((d) => d.label), (d) => d.y) + d3.max(this.drawnPoints.select((d) => !d.label), (d) => d.y)) / 2.0
+  getMaxMarginBounds() {
+    const groundx0 = d3.min(this.state.drawnPoints.filter((d) => d.label), (d) => d.x)
+    const groundx1 = d3.max(this.state.drawnPoints.filter((d) => d.label), (d) => d.x)
+    const groundy0 = d3.min(this.state.drawnPoints.filter((d) => d.label), (d) => d.y)
+    const groundy1 = d3.max(this.state.drawnPoints.filter((d) => d.label), (d) => d.y)
+
+    const loosex0 = d3.max(this.state.drawnPoints.filter((d) => !d.label).filter((d) => (d.x <= groundx0)), (d) => d.x)
+    const loosex1 = d3.min(this.state.drawnPoints.filter((d) => !d.label).filter((d) => (d.x >= groundx1)), (d) => d.x)
+    const loosey0 = d3.max(this.state.drawnPoints.filter((d) => !d.label).filter((d) => (d.y <= groundy0)), (d) => d.y)
+    const loosey1 = d3.min(this.state.drawnPoints.filter((d) => !d.label).filter((d) => (d.y >= groundy1)), (d) => d.y)
+
+    const x0 = (groundx0 + loosex0) / 2.0;
+    const x1 = (groundx1 + loosex1) / 2.0;
+    const y0 = (groundy0 + loosey0) / 2.0;
+    const y1 = (groundy1 + loosey1) / 2.0;
+
     const boundingBox = {
       x: {
         min: x0,
@@ -479,7 +619,7 @@ class PacScatter extends D3Component {
       }
     }
 
-    this.setState({candidateDistribution: boundingBox});
+    return boundingBox;
   }
 
   // Generating random data

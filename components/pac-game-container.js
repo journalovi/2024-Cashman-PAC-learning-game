@@ -12,7 +12,46 @@ import PacScatter from './pac-scatter';
 class PacGameContainer extends React.Component {
   constructor(props) {
     super(props)
-    this.state = {
+    const initialStory = {
+      staticDataset: false,
+      story: {
+        resetButtonActive: true,
+        pauseButtonActive: true,
+        playButtonActive: true,
+        testButtonActive: true,
+        generatePoints: true,
+        drawAllPoints: false,
+        showTopStrip: false,
+        showAllStrips: false,
+        temporalDrift: false,
+        trainTestMismatch: false,
+        trainDist: 'rectangle',
+        testDist: 'rectangle',
+        toggledClosestBounds: false,
+      }
+    }
+    this.state = {...this.initialState(), ...initialStory}
+
+    this.parseGameState();
+  }
+
+  componentDidUpdate(oldProps) {
+    if (oldProps.gamestate != this.props.gamestate) {
+      // We activate this state in the game
+      this.parseGameState();
+    }
+  }
+
+  initialize(node, props) {
+    this.resetState();
+  }
+
+  resetState() {
+    this.setState(this.initialState());
+  } 
+
+  initialState() {
+    return {
       speed: 'NORMAL',
       showGroundTruth: false,
       showCandidate: false,
@@ -40,42 +79,328 @@ class PacGameContainer extends React.Component {
       },
       sampleError: "N/A",
       testError: "N/A",
-      title: "Welcome to Blumer's Game!"
     }
-
   }
 
-  initialize(node, props) {
-    this.resetState();
-  }
+  parseGameState() {
+    // Here, we unwrap the game state.  Each game state has some specific rules.
+    switch (this.props.gamestate) {
+      case 'no_free_lunch':
+        // We turn everything off, and disable all buttons except test.
+        this.refresh();
+        this.setState({
+          showCandidate: false,
+          story: {
+            resetButtonActive: true,
+            pauseButtonActive: false,
+            playButtonActive: false,
+            testButtonActive: true,
+            generatePoints: false,
+            drawAllPoints: false,
+            showTopStrip: false,
+            showAllStrips: false,
+            temporalDrift: false,
+            trainTestMismatch: false,
+            trainDist: 'rectangle',
+            testDist: 'rectangle',
+            toggledClosestBounds: false,
+            toggledFurthestBounds: false,
+            toggledMaxMarginBounds: false
+          }
+        })
+        break;
+      case 'ten_samples':
+        // We show a static dataset of ten samples.  We disable all buttons including test.
+        this.refresh(true);
+        this.setState({
+          showCandidate: false,
+          story: {
+            resetButtonActive: false,
+            pauseButtonActive: false,
+            playButtonActive: false,
+            testButtonActive: false,
+            generatePoints: false,
+            drawAllPoints: true,
+            showTopStrip: false,
+            showAllStrips: false,
+            temporalDrift: false,
+            trainTestMismatch: false,
+            trainDist: 'rectangle',
+            testDist: 'rectangle',
+            toggledClosestBounds: false,
+            toggledFurthestBounds: false,
+            toggledMaxMarginBounds: false
+          }
+        })
+        break;
+      case 'tightest_fit':
+      case 'pac_learning_1':
+        // We show a static dataset of ten samples.  We disable all buttons including test.
+        // We also show the tightest fit rectangle
+        this.refresh(true);
+        this.setState({
+          showCandidate: true,
+          story: {
+            resetButtonActive: false,
+            pauseButtonActive: false,
+            playButtonActive: false,
+            testButtonActive: false,
+            generatePoints: false,
+            drawAllPoints: true,
+            showTopStrip: false,
+            showAllStrips: false,
+            temporalDrift: false,
+            trainTestMismatch: false,
+            trainDist: 'rectangle',
+            testDist: 'rectangle',
+            toggledClosestBounds: true,
+            toggledFurthestBounds: false,
+            toggledMaxMarginBounds: false
+          }
+        })
+        break;
+      case 'loosest_fit':
+        // We show a static dataset of ten samples.  We disable all buttons including test.
+        // We also show the loosest fit rectangle
+        this.refresh(true);
+        this.setState({
+          showCandidate: true,
+          story: {
+            resetButtonActive: false,
+            pauseButtonActive: false,
+            playButtonActive: false,
+            testButtonActive: false,
+            generatePoints: false,
+            drawAllPoints: true,
+            showTopStrip: false,
+            showAllStrips: false,
+            temporalDrift: false,
+            trainTestMismatch: false,
+            trainDist: 'rectangle',
+            testDist: 'rectangle',
+            toggledClosestBounds: false,
+            toggledFurthestBounds: true,
+            toggledMaxMarginBounds: false
 
-  resetState() {
-    this.state = {
-      speed: 'PAUSE',
-      showGroundTruth: false,
-      showCandidate: false,
-      resetData: false,
-      n_samples: 0,
-      total_samples: 100,
-      testing: false,
-      sampleError: "N/A",
-      testError: "N/A",
-      xAxisName: null,
-      yAxisName: null,
-      sampleStatistics: {
-        'accuracy': 0.0,
-        'tp': 0,
-        'tn': 0,
-        'fp': 0,
-        'fn': 0
-      },
-      testStatistics: {
-        'accuracy': 0.0,
-        'tp': 0,
-        'tn': 0,
-        'fp': 0,
-        'fn': 0
-      }
+          }
+        })
+        break;
+      case 'max_margin':
+        // We show a static dataset of ten samples.  We disable all buttons including test.
+        // We also show the rectangle that maximizes the margin
+        this.refresh(true);
+        this.setState({
+          showCandidate: true,
+          story: {
+            resetButtonActive: false,
+            pauseButtonActive: false,
+            playButtonActive: false,
+            testButtonActive: false,
+            generatePoints: false,
+            drawAllPoints: true,
+            showTopStrip: false,
+            showAllStrips: false,
+            temporalDrift: false,
+            trainTestMismatch: false,
+            trainDist: 'rectangle',
+            testDist: 'rectangle',
+            toggledClosestBounds: false,
+            toggledFurthestBounds: false,
+            toggledMaxMarginBounds: true
+          }
+        })
+        break;
+      case 'pause_definitions':
+        // We should hide the game completely
+        this.refresh();
+        this.setState({
+          showCandidate: false,
+          story: {
+            hidePlayer: true
+          }
+        })
+        break;
+      case 'pac_learning_2':
+        // We show a static dataset of ten samples.  We disable all buttons including test.
+        // We also show the tightest fit rectangle
+        // We also show the target rectangle
+        this.refresh(true);
+        this.setState({
+          showCandidate: true,
+          showGroundTruth: true,
+          story: {
+            resetButtonActive: false,
+            pauseButtonActive: false,
+            playButtonActive: false,
+            testButtonActive: false,
+            generatePoints: false,
+            drawAllPoints: true,
+            showTopStrip: false,
+            showAllStrips: false,
+            temporalDrift: false,
+            trainTestMismatch: false,
+            trainDist: 'rectangle',
+            testDist: 'rectangle',
+            toggledClosestBounds: true,
+            toggledFurthestBounds: false,
+            toggledMaxMarginBounds: false
+          }
+        })
+        break;
+      case 'pac_learning_3':
+        // We show a static dataset of ten samples.  We disable all buttons including test.
+        // We also show the tightest fit rectangle
+        // We also show the target rectangle
+        // We also highlight the top strip, and hide the other strips
+        this.refresh(true);
+        this.setState({
+          showCandidate: true,
+          showGroundTruth: true,
+          story: {
+            resetButtonActive: false,
+            pauseButtonActive: false,
+            playButtonActive: false,
+            testButtonActive: false,
+            generatePoints: false,
+            drawAllPoints: true,
+            showTopStrip: true,
+            showAllStrips: false,
+            temporalDrift: false,
+            trainTestMismatch: false,
+            trainDist: 'rectangle',
+            testDist: 'rectangle',
+            toggledClosestBounds: true,
+            toggledFurthestBounds: false,
+            toggledMaxMarginBounds: false
+          }
+        })
+        break;
+      case 'pac_learning_4':
+        // We show a static dataset of ten samples.  We disable all buttons including test.
+        // We also show the tightest fit rectangle
+        // We also show the target rectangle
+        // We highlight all four strips
+        this.refresh(true);
+        this.setState({
+          showCandidate: true,
+          showGroundTruth: true,
+          story: {
+            resetButtonActive: false,
+            pauseButtonActive: false,
+            playButtonActive: false,
+            testButtonActive: false,
+            generatePoints: false,
+            drawAllPoints: true,
+            showAllStrips: true,
+            showTopStrip: false,
+            temporalDrift: false,
+            trainTestMismatch: false,
+            trainDist: 'rectangle',
+            testDist: 'rectangle',
+            toggledClosestBounds: true,
+            toggledFurthestBounds: false,
+            toggledMaxMarginBounds: false
+          }
+        })
+        break;
+      case 'iid':
+        // All buttons active.  The source distribution has a temporal drift in 
+        // a random direction.
+        this.refresh();
+        this.setState({
+          showCandidate: false,
+          story: {
+            resetButtonActive: true,
+            pauseButtonActive: true,
+            playButtonActive: true,
+            testButtonActive: true,
+            generatePoints: false,
+            temporalDrift: true,
+            drawAllPoints: false,
+            showTopStrip: false,
+            showAllStrips: false,
+            trainTestMismatch: false,
+            trainDist: 'rectangle',
+            testDist: 'rectangle',
+            toggledClosestBounds: false,
+            toggledFurthestBounds: false,
+            toggledMaxMarginBounds: false
+          }
+        })
+        break;
+      case 'train_test_mismatch':
+        // All buttons active.  The train distribution and test distribtion are 
+        // different random regions
+        this.refresh();
+        this.setState({
+          showCandidate: false,
+          story: {
+            resetButtonActive: true,
+            pauseButtonActive: true,
+            playButtonActive: true,
+            testButtonActive: true,
+            generatePoints: false,
+            trainTestMismatch: true,
+            drawAllPoints: false,
+            showTopStrip: false,
+            showAllStrips: false,
+            temporalDrift: false,
+            trainDist: 'rectangle',
+            testDist: 'rectangle',
+            toggledClosestBounds: false,
+            toggledFurthestBounds: false,
+            toggledMaxMarginBounds: false
+          }
+        })
+        break;
+      case 'incorrect_model_class':
+        // All buttons active.  The train distribution is rectangles and the 
+        // test distribution is rings.
+        this.refresh();
+        this.setState({
+          showCandidate: false,
+          story: {
+            resetButtonActive: true,
+            pauseButtonActive: true,
+            playButtonActive: true,
+            testButtonActive: true,
+            generatePoints: false,
+            trainDist: 'rectangle',
+            testDist: 'ring',
+            drawAllPoints: false,
+            showTopStrip: false,
+            showAllStrips: false,
+            temporalDrift: false,
+            trainTestMismatch: false,
+            toggledClosestBounds: false,
+            toggledFurthestBounds: false,
+            toggledMaxMarginBounds: false
+          }
+        })
+        break;
+      case 'free_play':
+        // All hidden configs are active.
+        this.refresh();
+        this.setState({
+          showCandidate: false,
+          story: {
+            resetButtonActive: true,
+            pauseButtonActive: true,
+            playButtonActive: true,
+            testButtonActive: true,
+            generatePoints: true,
+            drawAllPoints: false,
+            temporalDrift: false,
+            trainTestMismatch: false,
+            trainDist: 'rectangle',
+            testDist: 'rectangle',
+            toggledClosestBounds: false,
+            toggledFurthestBounds: false,
+            toggledMaxMarginBounds: false
+
+          }
+        })
+        break;
     }
   }
 
@@ -87,9 +412,9 @@ class PacGameContainer extends React.Component {
     this.setState({showCandidate: !this.state.showCandidate})
   }
 
-  refresh() {
+  refresh(isStatic=false) {
     this.resetState();
-    this.setState({setRefresh: true})
+    this.setState({setRefresh: true, staticDataset: isStatic})
   }
 
   pause() {
@@ -111,7 +436,7 @@ class PacGameContainer extends React.Component {
   incrementSamples() {
     this.setState((state, props) => {
       return {n_samples: state.n_samples += 1}
-    });
+    });      
   }
 
   resetSamples() {
@@ -128,7 +453,6 @@ class PacGameContainer extends React.Component {
 
   updateSampleError(sampleStatistics) {
     this.setState((state, props) => {
-      console.log("updating SampleError with sampleStatistics", sampleStatistics)
       return {sampleStatistics: sampleStatistics}
     });
   }
@@ -144,9 +468,9 @@ class PacGameContainer extends React.Component {
 
     return (
       <div className='pac-game-container' {...props}>
-        <Paper>
+        <Paper >
           <Paper elevation={3} >
-            <div className='pac-game-message'>{this.state.title}</div>
+            <div className='pac-game-message'>{this.props.parentcurrgamemsg}</div>
           </Paper>
           <Grid container spacing={3}>
             {/* <Grid item container xs={2}>
@@ -158,20 +482,16 @@ class PacGameContainer extends React.Component {
               <Grid item xs={12} className='pac-game-step'>How does Viz fix this?</Grid>
             </Grid>
             <Grid item xs={10}> */}
+
             <Grid item xs={1}/>
             <Grid item xs={11}>
               <Grid container spacing={4}>
                 <Grid item xs={12}>
-                  <Button onClick={this.refresh.bind(this)}><Refresh/></Button>
-                  <Button className={this.state.speed === 'PAUSE' ? 'selectedButton' : null} onClick={this.pause.bind(this)}><Pause/></Button>
-                  <Button className={this.state.speed === 'NORMAL' ? 'selectedButton' : null} onClick={this.play.bind(this)}><PlayArrow/></Button>
-                  <Button className={this.state.speed === 'FASTER' ? 'selectedButton' : null} onClick={this.faster.bind(this)}><SkipNext/></Button>
-                  <Button onClick={this.toggleTesting.bind(this)}>Test!</Button>
-                  {/* <Button onClick={this.toggleGroundTruth.bind(this)}>Toggleshow</Button> */}
-                  {/* <Button onClick={this.toggleCandidate.bind(this)}>cand</Button> */}
-                  {/* <Button onClick={this.toggleCandidate.bind(this)}>cand</Button> */}
-                  {/* <Button onClick={this.toggleCandidate.bind(this)}>cand</Button> */}
-                  {/* <Button onClick={this.toggleCandidate.bind(this)}>cand</Button> */}
+                  <Button disabled={!this.state.story.resetButtonActive} onClick={this.refresh.bind(this)}><Refresh/></Button>
+                  <Button disabled={!this.state.story.pauseButtonActive} className={this.state.speed === 'PAUSE' ? 'selectedButton' : null} onClick={this.pause.bind(this)}><Pause/></Button>
+                  <Button disabled={!this.state.story.playButtonActive} className={this.state.speed === 'NORMAL' ? 'selectedButton' : null} onClick={this.play.bind(this)}><PlayArrow/></Button>
+                  <Button disabled={!this.state.story.playButtonActive} className={this.state.speed === 'FASTER' ? 'selectedButton' : null} onClick={this.faster.bind(this)}><SkipNext/></Button>
+                  <Button disabled={!this.state.story.testButtonActive} onClick={this.toggleTesting.bind(this)}>Test!</Button>
                 </Grid>
               </Grid>
               <Grid item xs={12}>
@@ -193,6 +513,14 @@ class PacGameContainer extends React.Component {
                   setRefresh={this.state.setRefresh}
                   xAxisName={this.state.xAxisName}
                   yAxisName={this.state.yAxisName}
+                  generatePoints={this.state.story.generatePoints}
+                  staticDataset={this.state.staticDataset}
+                  drawAllPoints={this.state.story.drawAllPoints}
+                  toggledClosestBounds={this.state.story.toggledClosestBounds}
+                  toggledFurthestBounds={this.state.story.toggledFurthestBounds}
+                  toggledMaxMarginBounds={this.state.story.toggledMaxMarginBounds}
+                  showTopStrip={this.state.story.showTopStrip}
+                  showAllStrips={this.state.story.showAllStrips}
                 />
               </Grid>
               <Grid container space={2}>
