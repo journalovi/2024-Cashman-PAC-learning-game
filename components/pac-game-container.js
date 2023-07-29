@@ -355,7 +355,7 @@ class PacGameContainer extends React.Component {
             toggledFurthestBounds: false,
             toggledMaxMarginBounds: false
           }
-        })
+        }, () => { this.refresh() })
         break;
       case 'train_test_mismatch':
         // All buttons active.  The train distribution and test distribtion are 
@@ -382,7 +382,7 @@ class PacGameContainer extends React.Component {
             toggledFurthestBounds: false,
             toggledMaxMarginBounds: false
           }
-        })
+        }, () => { this.refresh() })
         break;
       case 'incorrect_model_class':
         // All buttons active.  The train distribution is rectangles and the 
@@ -409,7 +409,7 @@ class PacGameContainer extends React.Component {
             toggledFurthestBounds: false,
             toggledMaxMarginBounds: false
           }
-        })
+        }, () => { this.refresh() })
         break;
       case 'free_play':
         // All hidden configs are active.
