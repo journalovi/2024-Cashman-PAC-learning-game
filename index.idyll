@@ -282,6 +282,8 @@ But not so fast - there's a major issue that we didn't mention.  The proof we we
 
 That the sampled data in independent and identically distributed (typically referred to as i.i.d).  In real world data, this may not be the case; if the algorithm is being trained on streamed data, it typically cannot be considered independent draws.  This assumption was used in our probability bounds.
 
+In this version of the game, the i.i.d. assumption is violated by placing some linear drift on the data.  As we get new points, they move linearly in a certain direction.
+
 [SectionDivider /]
 
 ### Training-Testing Mismatch
@@ -296,7 +298,9 @@ That the sampled data in independent and identically distributed (typically refe
   parentcurrgamemsg: currgamemsg
   onEnterView: `train_test_mismatch++` scrolloffset:300
 /]
-The data that we test our algorithm on is the same distribution that we train our algorithm on.  Consider a computer vision algorithm for a self-driving car that only trained in the Pacific Northwestern United States, and then was deployed in a desert climate; the behavior of the computer vision algorithm in training might have no relationship with its behavior in testing.  This would correspond to the testing samples being labeled in a different region than during training.
+We assume (or at least count on) that the data that we test our algorithm on is from the same distribution that we train our algorithm on.  This assumption is frequently incorrect in practice, and can result in unexpected behavior by the machine learning algorithm.  Consider a computer vision algorithm for a self-driving car that only trained in the Pacific Northwestern United States, and then was deployed in a desert climate; the behavior of the computer vision algorithm in training might have no relationship with its behavior in testing.  This would correspond to the testing samples being labeled in a different region than during training.
+
+In this version of the game, the training distribution and the testing distribution are independent of one another.  This means that the true labels (green points) that you get in training may not be representative of where the true labels would appear in the testing phase.  It makes it impossible to guarantee any performance: it's back to the No Free Lunch situation described earlier.
 
 [SectionDivider /]
 
@@ -304,8 +308,8 @@ The data that we test our algorithm on is the same distribution that we train ou
 
 [var name:"incorrect_model_class" value:0 /]
 [GameChanger 
-  longtext: "Total error from four strips is less than epsilon."
-  shorttext: "Error from All Strip"
+  longtext: "What if our Model Class is Wrong?"
+  shorttext: "Ellipses, not Rectangles"
   gamestate: "incorrect_model_class"
   progressvar: incorrect_model_class
   parentcurrgamestate: currgamestate
@@ -313,7 +317,9 @@ The data that we test our algorithm on is the same distribution that we train ou
   onEnterView: `incorrect_model_class++` scrolloffset:300
 /]
 
-Our proof assumed that we already knew that the type of region we were looking for was a rectangle.  But in practice, we rarely know what kind of machine learning model will match the phenomenon being modeled in the data.  Suppose, instead of a rectangular region, the region we were looking for turned out to be an ellipse, or a parallellogram, or even an arbitrary, amorphous disconnected region.  A geometric proof would then be impossible.
+Our proof assumed that we already knew that the type of region we were looking for was a rectangle.  But in practice, we rarely know what kind of machine learning model will match the phenomenon being modeled in the data.  Suppose, instead of a rectangular region, the region we were looking for turned out to be an ellipse, or a parallellogram, or even an arbitrary, amorphous disconnected region.  A geometric proof would then be much harder, or even impossible.
+
+In this version of the game, the actual region we are trying to guess is an ellipse, but we can only choose a rectangle.  Play it a few times and notice that no matter how good your guess is, you will always have some nonzero lower bound on your testing error.
 
 [SectionDivider /]
 
@@ -329,21 +335,6 @@ Instead, a human in the loop, armed with appropriate visualizations and analytic
 
 
 [SectionDivider /]
-
-## Free Play
-
-[var name:"free_play" value:0 /]
-[GameChanger 
-  longtext: "Play Blumer's Game with all available options!"
-  shorttext: "Free Play"
-  gamestate: "free_play"
-  progressvar: free_play
-  parentcurrgamestate: currgamestate
-  parentcurrgamemsg: currgamemsg
-  onEnterView: `free_play++` scrolloffset:300
-/]
-
-Here, you can try out Blumer's game with additional configuration.  You can set the data distribution, the concept classes, and you can apply drift.  Try to play the game under an easy setting, see how close you can get to predicting the error, and then switch to a harder setting.  Does it make you feel more or less confident about the usage of machine learning in our daily lives?
 
 ## Conclusion
 

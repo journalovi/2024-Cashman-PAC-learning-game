@@ -314,7 +314,7 @@ class PacGameContainer extends React.Component {
             pauseButtonActive: true,
             playButtonActive: true,
             testButtonActive: true,
-            generatePoints: false,
+            generatePoints: true,
             temporalDrift: true,
             drawAllPoints: false,
             showTopStrip: false,
@@ -339,7 +339,7 @@ class PacGameContainer extends React.Component {
             pauseButtonActive: true,
             playButtonActive: true,
             testButtonActive: true,
-            generatePoints: false,
+            generatePoints: true,
             trainTestMismatch: true,
             drawAllPoints: false,
             showTopStrip: false,
@@ -410,6 +410,10 @@ class PacGameContainer extends React.Component {
 
   toggleCandidate() {
     this.setState({showCandidate: !this.state.showCandidate})
+  }
+
+  refreshClicked() {
+    this.refresh(false);
   }
 
   refresh(isStatic=false) {
@@ -487,7 +491,7 @@ class PacGameContainer extends React.Component {
             <Grid item xs={11}>
               <Grid container spacing={4}>
                 <Grid item xs={12}>
-                  <Button disabled={!this.state.story.resetButtonActive} onClick={this.refresh.bind(this)}><Refresh/></Button>
+                  <Button disabled={!this.state.story.resetButtonActive} onClick={this.refreshClicked.bind(this)}><Refresh/></Button>
                   <Button disabled={!this.state.story.pauseButtonActive} className={this.state.speed === 'PAUSE' ? 'selectedButton' : null} onClick={this.pause.bind(this)}><Pause/></Button>
                   <Button disabled={!this.state.story.playButtonActive} className={this.state.speed === 'NORMAL' ? 'selectedButton' : null} onClick={this.play.bind(this)}><PlayArrow/></Button>
                   <Button disabled={!this.state.story.playButtonActive} className={this.state.speed === 'FASTER' ? 'selectedButton' : null} onClick={this.faster.bind(this)}><SkipNext/></Button>
@@ -501,9 +505,9 @@ class PacGameContainer extends React.Component {
                   showGroundTruth={this.state.showGroundTruth}
                   showCandidate={this.state.showCandidate}
                   resetData={this.state.resetData}
-                  targetTrainDistributionType="rectangle"
-                  targetTestDistributionType="rectangle"
-                  trainMatchTest={true}
+                  targetTrainDistributionType={this.state.targetTrainDistributionType}
+                  targetTestDistributionType={this.state.targetTestDistributionType}
+                  trainMatchTest={!this.state.story.trainTestMismatch}
                   testing={this.state.testing}
                   updateSampleError={this.updateSampleError.bind(this)}
                   updateTestError={this.updateTestError.bind(this)}
@@ -521,6 +525,7 @@ class PacGameContainer extends React.Component {
                   toggledMaxMarginBounds={this.state.story.toggledMaxMarginBounds}
                   showTopStrip={this.state.story.showTopStrip}
                   showAllStrips={this.state.story.showAllStrips}
+                  temporalDrift={this.state.story.temporalDrift}
                 />
               </Grid>
               <Grid container space={2}>
