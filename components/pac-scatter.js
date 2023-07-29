@@ -67,9 +67,12 @@ class PacScatter extends D3Component {
         this.generatedTrainData = this.generateUniformRectData(this.targetTrainDistribution, this.outerBounds, this.props.total_samples)  
       }
 
+      // console.log("this.props.targetTestDistributionType is ", this.props.targetTestDistributionType)
       if (this.props.targetTestDistributionType === 'ellipse') {
+        // console.log("generatedTestData is being labeled as an ellipse")
         this.generatedTestData = this.generateUniformEllipseData(this.targetTestDistribution, this.outerBounds, this.props.total_samples)
       } else {
+        // console.log("generatedTestData is being labeled as a rectangle")
         this.generatedTestData = this.generateUniformRectData(this.targetTestDistribution, this.outerBounds, this.props.total_samples)  
       }
     }
@@ -499,8 +502,21 @@ class PacScatter extends D3Component {
     return stats
   }
 
-  calculateErrorEllipse() {
-    return 0.4;
+  calculateErrorEllipse(candidateDistribution, targetBoundingBox) {
+    const intersectionRectArea = this.calculateIntersectionRectArea(targetBoundingBox, candidateDistribution);
+    const candidateBoxArea = (candidateDistribution.x.max - candidateDistribution.x.min) * (candidateDistribution.y.max - candidateDistribution.y.min);
+    const targetBoxArea = (targetBoundingBox.x.max - targetBoundingBox.x.min) * (targetBoundingBox.y.max - targetBoundingBox.y.min);
+
+    let stats = {
+      'tp': intersectionRectArea * 100,
+      'fp': (candidateBoxArea - intersectionRectArea) * 100,
+      'fn': (targetBoxArea - intersectionRectArea) * 100
+    }
+    stats['tn'] = 100.0 - (stats['tp'] + stats['fp'] + stats['fn']) // assumes full area is 1.0
+    stats['accuracy'] = stats['tp'] + stats['tn'] // assumes full area is 1.0
+    stats['error'] = 100.0 - stats['accuracy']
+
+    return stats
   }
 
   calculateIntersectionRectArea(boxA, boxB) {
@@ -512,10 +528,11 @@ class PacScatter extends D3Component {
   }
 
   drawTargetDistribution(forceDraw=false, targetDistribution=null) {
-    // console.log("in drawTargetDistribution, forceDraw is ", forceDraw, "and targetDistribution is ", targetDistribution, " also, this.props.targetTrainDistributionType is ", this.props.targetTrainDistributionType, "and this is ", this)
-    if (this.props.targetTrainDistributionType === 'rectangle') {
+    // console.log("in drawTargetDistribution, forceDraw is ", forceDraw, "and targetDistribution is ", targetDistribution, " also, this.props.targetTestDistributionType is ", this.props.targetTestDistributionType, "and this is ", this)
+    if (this.props.targetTestDistributionType === 'rectangle') {
       this.drawTargetDistributionRectangle(forceDraw, targetDistribution);
-    } else if (this.props.targetTrainDistributionType === 'ellipse') {
+    } else if (this.props.targetTestDistributionType === 'ellipse') {
+      console.log("drawing ellipse")
       this.drawTargetDistributionEllipse(forceDraw);
     }
   }
@@ -674,6 +691,7 @@ class PacScatter extends D3Component {
   }
 
   generateUniformRandomPt(shapeBounds, outerBounds, region='rectangle') {
+    console.log("generating random pt with region ", region)
     const outerXMin = outerBounds.x.min,
     outerXMax = outerBounds.x.max,
     outerYMin = outerBounds.y.min,
@@ -704,6 +722,10 @@ class PacScatter extends D3Component {
     ellipseRX = (boundingBox.x.max - boundingBox.x.min) / 2.0, 
     ellipseRY = (boundingBox.y.max - boundingBox.y.min) / 2.0;
 
+    // const value = (((x - ellipseCX)*(x - ellipseCX))/(ellipseRX*ellipseRX)
+          // + ((y - ellipseCY)*(y - ellipseCY))/(ellipseRY*ellipseRY))
+
+    // console.log("value is ", value, "x is ", x, "y is ", y, " and boundingBox is ", boundingBox)
     return (((x - ellipseCX)*(x - ellipseCX))/(ellipseRX*ellipseRX)
           + ((y - ellipseCY)*(y - ellipseCY))/(ellipseRY*ellipseRY))
           < 1.0;

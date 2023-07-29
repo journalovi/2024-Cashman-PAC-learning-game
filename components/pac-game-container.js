@@ -12,25 +12,7 @@ import PacScatter from './pac-scatter';
 class PacGameContainer extends React.Component {
   constructor(props) {
     super(props)
-    const initialStory = {
-      staticDataset: false,
-      story: {
-        resetButtonActive: true,
-        pauseButtonActive: true,
-        playButtonActive: true,
-        testButtonActive: true,
-        generatePoints: true,
-        drawAllPoints: false,
-        showTopStrip: false,
-        showAllStrips: false,
-        temporalDrift: false,
-        trainTestMismatch: false,
-        trainDist: 'rectangle',
-        testDist: 'rectangle',
-        toggledClosestBounds: false,
-      }
-    }
-    this.state = {...this.initialState(), ...initialStory}
+    this.state = {...this.initialState(), ...this.initialStory()}
 
     this.parseGameState();
   }
@@ -82,15 +64,44 @@ class PacGameContainer extends React.Component {
     }
   }
 
+  initialStory() {
+    return {
+      staticDataset: false,
+      story: {
+        targetTrainDistributionType: 'rectangle',
+        targetTestDistributionType: 'rectangle',
+        resetButtonActive: true,
+        pauseButtonActive: true,
+        playButtonActive: true,
+        testButtonActive: true,
+        generatePoints: true,
+        drawAllPoints: false,
+        showTopStrip: false,
+        showAllStrips: false,
+        temporalDrift: false,
+        trainTestMismatch: false,
+        trainDist: 'rectangle',
+        testDist: 'rectangle',
+        toggledClosestBounds: false,
+      }
+    }
+  }
+
   parseGameState() {
     // Here, we unwrap the game state.  Each game state has some specific rules.
     switch (this.props.gamestate) {
+      case 'beginning': 
+        this.refresh();
+        this.setState(this.initialStory());
+      break;
       case 'no_free_lunch':
         // We turn everything off, and disable all buttons except test.
         this.refresh();
         this.setState({
           showCandidate: false,
           story: {
+            targetTrainDistributionType: 'rectangle',
+            targetTestDistributionType: 'rectangle',
             resetButtonActive: true,
             pauseButtonActive: false,
             playButtonActive: false,
@@ -115,6 +126,8 @@ class PacGameContainer extends React.Component {
         this.setState({
           showCandidate: false,
           story: {
+            targetTrainDistributionType: 'rectangle',
+            targetTestDistributionType: 'rectangle',
             resetButtonActive: false,
             pauseButtonActive: false,
             playButtonActive: false,
@@ -141,6 +154,8 @@ class PacGameContainer extends React.Component {
         this.setState({
           showCandidate: true,
           story: {
+            targetTrainDistributionType: 'rectangle',
+            targetTestDistributionType: 'rectangle',
             resetButtonActive: false,
             pauseButtonActive: false,
             playButtonActive: false,
@@ -166,6 +181,8 @@ class PacGameContainer extends React.Component {
         this.setState({
           showCandidate: true,
           story: {
+            targetTrainDistributionType: 'rectangle',
+            targetTestDistributionType: 'rectangle',
             resetButtonActive: false,
             pauseButtonActive: false,
             playButtonActive: false,
@@ -192,6 +209,8 @@ class PacGameContainer extends React.Component {
         this.setState({
           showCandidate: true,
           story: {
+            targetTrainDistributionType: 'rectangle',
+            targetTestDistributionType: 'rectangle',
             resetButtonActive: false,
             pauseButtonActive: false,
             playButtonActive: false,
@@ -216,6 +235,8 @@ class PacGameContainer extends React.Component {
         this.setState({
           showCandidate: false,
           story: {
+            targetTrainDistributionType: 'rectangle',
+            targetTestDistributionType: 'rectangle',
             hidePlayer: true
           }
         })
@@ -229,6 +250,8 @@ class PacGameContainer extends React.Component {
           showCandidate: true,
           showGroundTruth: true,
           story: {
+            targetTrainDistributionType: 'rectangle',
+            targetTestDistributionType: 'rectangle',
             resetButtonActive: false,
             pauseButtonActive: false,
             playButtonActive: false,
@@ -257,6 +280,8 @@ class PacGameContainer extends React.Component {
           showCandidate: true,
           showGroundTruth: true,
           story: {
+            targetTrainDistributionType: 'rectangle',
+            targetTestDistributionType: 'rectangle',
             resetButtonActive: false,
             pauseButtonActive: false,
             playButtonActive: false,
@@ -285,6 +310,8 @@ class PacGameContainer extends React.Component {
           showCandidate: true,
           showGroundTruth: true,
           story: {
+            targetTrainDistributionType: 'rectangle',
+            targetTestDistributionType: 'rectangle',
             resetButtonActive: false,
             pauseButtonActive: false,
             playButtonActive: false,
@@ -310,6 +337,8 @@ class PacGameContainer extends React.Component {
         this.setState({
           showCandidate: false,
           story: {
+            targetTrainDistributionType: 'rectangle',
+            targetTestDistributionType: 'rectangle',
             resetButtonActive: true,
             pauseButtonActive: true,
             playButtonActive: true,
@@ -335,6 +364,8 @@ class PacGameContainer extends React.Component {
         this.setState({
           showCandidate: false,
           story: {
+            targetTrainDistributionType: 'rectangle',
+            targetTestDistributionType: 'rectangle',
             resetButtonActive: true,
             pauseButtonActive: true,
             playButtonActive: true,
@@ -360,11 +391,13 @@ class PacGameContainer extends React.Component {
         this.setState({
           showCandidate: false,
           story: {
+            targetTrainDistributionType: 'rectangle',
+            targetTestDistributionType: 'ellipse',
             resetButtonActive: true,
             pauseButtonActive: true,
             playButtonActive: true,
             testButtonActive: true,
-            generatePoints: false,
+            generatePoints: true,
             trainDist: 'rectangle',
             testDist: 'ring',
             drawAllPoints: false,
@@ -505,8 +538,8 @@ class PacGameContainer extends React.Component {
                   showGroundTruth={this.state.showGroundTruth}
                   showCandidate={this.state.showCandidate}
                   resetData={this.state.resetData}
-                  targetTrainDistributionType={this.state.targetTrainDistributionType}
-                  targetTestDistributionType={this.state.targetTestDistributionType}
+                  targetTrainDistributionType={this.state.story.targetTrainDistributionType}
+                  targetTestDistributionType={this.state.story.targetTestDistributionType}
                   trainMatchTest={!this.state.story.trainTestMismatch}
                   testing={this.state.testing}
                   updateSampleError={this.updateSampleError.bind(this)}
