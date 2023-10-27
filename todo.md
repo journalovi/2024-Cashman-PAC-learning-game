@@ -14,10 +14,12 @@
 - [X] Use the example of static data from earlier to draw out the patches on the PAC-learnability proof
 
 - [] Move details to annotations to make it more readable
-- [] Proofread the text
+- [x] Proofread the text
 - [] Fix calculations of test error for when there are no points
 - [] Fix scroll offset for the scroller buttons
-- [] Add a gamechanger button at the top
+- [x] Add a gamechanger button at the top
 - [] Consider adding a table of contents?
 - [] Consider adding an info button?
 - [] speed seems to be too fast when we get to the bottom.
+
+Deploy via https://gist.github.com/cobyism/4730490

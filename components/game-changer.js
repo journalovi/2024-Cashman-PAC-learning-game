@@ -1,6 +1,7 @@
 const React = require('react');
 import Fab from '@material-ui/core/Fab';
 import NavigationIcon from '@material-ui/icons/Navigation';
+import InfoTooltip from './info-tooltip';
 
 class GameChanger extends React.Component {
 
@@ -31,15 +32,6 @@ class GameChanger extends React.Component {
   render() {
     const { hasError, idyll, updateProps, ...props } = this.props;
 
-    // Initialize
-    // const scrolledPast = false;
-
-    // React.useEffect(() => {
-    //   console.log("progressvar has changed", props.progressvar)
-    // }, [props.progressvar])
-
-  
-
     return (
       <div className="game-changer" {...props}>
         <Fab variant="extended" size="medium" color="primary" onClick={this.forceGameState.bind(this)}>
@@ -49,11 +41,10 @@ class GameChanger extends React.Component {
           />
           {props.shorttext}
         </Fab>
+        {props.showhelp && <InfoTooltip tooltiptext="As you scroll through this page, each time you see a button like this one, the game will change to match where you are in the text.  After that, to go back to any previous state, either click on the buttons, or refresh the page." />}
       </div>
     );
   }
-
-  // Need to add a callback that changes the global props to the gamestate when... when it is scrolled over I guess?  Or if it is clicked?
 }
 
 module.exports = GameChanger;
