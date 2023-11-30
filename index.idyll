@@ -24,6 +24,10 @@
 
 [/Fixed]
 
+## Abstract
+
+In this interactive article, we present an interactive game that represents the types of tasks solved by machine learning algorithms.  We use this game to motivate the definition of Probably Approximately Correct (PAC) learning, illustrating a proof of PAC learnability for Empirical Risk Minimization (ERM).  Then, we show three types of vulnerabilities of ERM that often occur in applied machine learning - domain mismatch, dependencies in data, and an incorrect model class.  We conclude by arguing for the need for visualization to identify these issues in a modeling dataset.
+
 ## Introduction
 [var name:"beginning" value:0 /]
 [GameChanger 
@@ -350,18 +354,40 @@ Instead, a human in the loop, armed with appropriate visualizations and analytic
 
 In this interactive article, we used the Four Germans Game to illustrate the concept of probably approximately correct (PAC) learning.  We then demonstrated how several assumptions are used in learning theory to build theoretical bounds on performance for machine learning models in the empirical risk minimization learning paradigm.  We presented some examples, using the game, of how these assumptions might be broken.  
 
-## Further Reading
-
-- *An Introduction to Computational Learning Theory* by Kearns and Vazirani
-- [link text: "The Myth of the Impartial Machine by Feng and Wu" url: "https://parametric.press/issue-01/the-myth-of-the-impartial-machine/" /]
-- *Principles of Risk Minimization for Learning Theory* by Vapnik
-- *On the Safety of Machine Learning: Cyber-Physical Systems, Decision Sciences, and Data Products* by Varshney and Alemzadeh
-- *Probably Approximately Correct: Nature's Algorithms for Learning and Prospering in a Complex World* by Leslie Valiant
 
 ## Special Thanks
 
 Thank you to Anselm Blumer and the reviewers from VisXAI.
 
-# About The Author
+## References
+
+- Blumer, Anselm, et al. "Learnability and the Vapnik-Chervonenkis dimension." Journal of the ACM (JACM) 36.4 (1989): 929-965.
+- Kearns, Michael J., and Umesh Vazirani. An introduction to computational learning theory. MIT press, 1994.
+- Feng, Alice, et al. "The myth of the impartial machine." The Parametric Press (2019).
+- Vapnik, Vladimir. "Principles of risk minimization for learning theory." Advances in neural information processing systems 4 (1991).
+- Varshney, Kush R., and Homa Alemzadeh. "On the safety of machine learning: Cyber-physical systems, decision sciences, and data products." Big data 5.3 (2017): 246-255.
+- Valiant, Leslie. "Probably approximately correct: nature's algorithms for learning and prospering in a complex world." (2013).
+- Adiga, Abhijin, et al. "PAC learnability of node functions in networked dynamical systems." International Conference on Machine Learning. PMLR, 2019.
+- Shao, Han, Omar Montasser, and Avrim Blum. "A theory of pac learnability under transformation invariances." Advances in Neural Information Processing Systems 35 (2022): 13989-14001.
+- Badue, Claudine, et al. "Self-driving cars: A survey." Expert Systems with Applications 165 (2021): 113816.
+- Kwon, Joon-myoung, et al. "Validation of deep-learning-based triage and acuity score using a large national dataset." PloS one 13.10 (2018): e0205836.
+- Wu, Shaobing, et al. "Crime prediction using data mining and machine learning." The 8th International Conference on Computer Engineering and Networks (CENet2018). Springer International Publishing, 2020.
+- Fujiyoshi, Hironobu, Tsubasa Hirakawa, and Takayoshi Yamashita. "Deep learning-based image recognition for autonomous driving." IATSS research 43.4 (2019): 244-252.
+- Buolamwini, Joy, and Timnit Gebru. "Gender shades: Intersectional accuracy disparities in commercial gender classification." Conference on fairness, accountability and transparency. PMLR, 2018.
+- Wolpert, David H., and William G. Macready. "No free lunch theorems for optimization." IEEE transactions on evolutionary computation 1.1 (1997): 67-82.
+
+## Research Material Statements
+
+No datasets are used in this interactive article.  The data visualized within the game is either randomly generated or hardcoded in.  You can view the source code for this article on its [link text: "Github repository" url: "github.com"].  Please see the software license below.
+
+## About The Author
 
 Dylan Cashman is an assistant professor in the Michtom School of Computer Science at Brandeis University in Waltham, MA.  He previously worked as a Senior Expert in Data Science and Advanced Visual Analytics within the Data Science and Artificial Intelligence division of Novartis Pharmaceuticals in Cambridge, MA.  Dylan holds a PhD in Computer Science from Tufts University and an Sc. B in Mathematics from Brown University.  His research interests include the development and evaluation of visual affordances that improve usability of artificial intelligence models and data science processes.  His research has won best paper awards at the Eurovis conference, the Symposium on Visualization for Data Science (VDS), and the Workshop on Visual Analytics for Deep Learning at IEEEVIS.
+
+## License
+
+This work is licensed under a [link text: "Creative Commons Attribution-ShareAlike 4.0 International License" url: "https://creativecommons.org/licenses/by-sa/4.0/" /].
+
+## Conflict of Interest
+
+The author declares that there are no competing interests.
