@@ -24,6 +24,9 @@
 
 [/Fixed]
 
+## Under Review
+This paper is under review on the experimental track of the [Journal of Visualization and Interaction](https://www.journalovi.org/).
+
 ## Abstract
 
 In this interactive article, we present an interactive game that represents the types of tasks solved by machine learning algorithms.  We use this game to motivate the definition of Probably Approximately Correct (PAC) learning, illustrating a proof of PAC learnability for Empirical Risk Minimization (ERM).  Then, we show three types of vulnerabilities of ERM that often occur in applied machine learning - domain mismatch, dependencies in data, and an incorrect model class.  We conclude by arguing for the need for visualization to identify these issues in a modeling dataset.
