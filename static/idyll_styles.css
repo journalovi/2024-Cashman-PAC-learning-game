@@ -1210,6 +1210,9 @@ span.idyll-input-error{
   opacity: 0.3 !important;
   border-color: yellow !important;
 }
+.pac-game-container .candidate-distribution-t:hover {
+  fill: green !important;
+}
 
 .pac-game-container .candidate-distribution-t-text {
   color: brown !important;
