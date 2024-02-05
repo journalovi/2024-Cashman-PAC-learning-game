@@ -1,3 +1,8 @@
+
+```diff
+! This paper is under review on the experimental track of the Journal of Visualization and Interaction.
+```
+
 # Probably Approximately Correct Learning: a machine learning game
 
 This repository is the codebase for a blog post designed to illustrate the challenges that machine learning algorithms encounter when trying to fit a dataset.  It is implemented in [idyll](https://idyll-lang.org/), a toolkit for creating data-driven stories and explorable explanations.  
