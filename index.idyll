@@ -1,4 +1,4 @@
-[meta title:"pac_learning" description:"An illustration of PAC Learning and why ML models can fail in deployment." /]
+[meta title:"PAC Learning; Or: Why We Should (and Shouldn't) Trust Machine Learning" description:"An illustration of PAC Learning and why ML models can fail in deployment." /]
 
 [Header
   fullWidth:true
