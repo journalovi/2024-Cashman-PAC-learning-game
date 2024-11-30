@@ -9,6 +9,8 @@ This repository is the codebase for a blog post designed to illustrate the chall
 
 It will be accessible at a public URL once it has been peer-reviewed.
 
+The files are stored in a persistent OSF project at [https://osf.io/65gre/](https://osf.io/65gre/).
+
 ## Installation
 
 From the root directory, install dependencies with node.
