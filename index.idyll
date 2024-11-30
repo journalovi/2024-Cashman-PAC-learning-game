@@ -6,7 +6,7 @@
   subtitle:"Or: Why We Should (and Shouldn't) Trust Machine Learning"
   author: "Dylan Cashman, Assistant Professor of Computer Science, Brandeis University"
   authorurl:"https://cs.brandeis.edu/~dylan"
-  date:"October 18, 2023"
+  date:"November 30, 2024"
   background:"#222222"
   color:"#ffffff"
    /]
@@ -26,6 +26,18 @@
 
 ## Under Review
 This paper is under review on the experimental track of the [Journal of Visualization and Interaction](https://www.journalovi.org/).
+
+### Table of Contents
+
+- [link text: "Abstract" url: "#abstract"/]
+- [link text: "Introduction" url: "#introduction"/]
+- [link text: "Four Germans Game: Find My Rectangle" url: "#four-germans-game:-find-my-rectangle"/]
+- [link text: "PAC Learning" url: "#pac-learning"/]
+- [link text: "Assuming the Worst" url: "#assuming-the-worst"/]
+- [link text: "An Argument for Visualization in Applied Machine Learning" url: "#an-argument-for-visualization-in-applied-machine-learning"/]
+- [link text: "Conclusion" url: "#conclusion"/]
+
+
 
 ## Abstract
 
