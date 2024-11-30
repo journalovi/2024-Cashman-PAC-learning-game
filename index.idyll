@@ -228,7 +228,7 @@ In other words, a type of concept (which could be rectangular regions on a plane
 
 It's useful to consider when a concept is *not* PAC learnable.  It would seem pretty universal that the more samples a learning algorithm sees, the more confident it would get about its predictions, and the better those predictions would be.  But in a lot of problems, you hit a plateau.  If you try to fit a very simple model, like a logistic regression classifier, to a very complicated concept, like classifying photos of dogs, you probably can't guarantee any arbitrary level of performance no matter how many samples you see.
 
-### Why is this important?
+### Why Should We Care About PAC Learnability
 
 The most popular learning paradigm used in machine learning use cases is [link text: "Empirical Risk Minimization" url: "https://en.wikipedia.org/wiki/Empirical_risk_minimization" /], which says that when we want to minimize error (and thus risk) when putting a machine learning model out in the world, we should first tune it to minimize error on the *empirical* data that we have, i.e. the training data.  By minimizing the *empirical risk*, we are hopefully minimizing the *actual risk* the model will try to avoid when it is used out in the world.  
 
