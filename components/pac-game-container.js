@@ -538,11 +538,11 @@ class PacGameContainer extends React.Component {
             <Grid item xs={11}>
               <Grid container spacing={4}>
                 <Grid item xs={12}>
-                  <Button disabled={!this.state.story.resetButtonActive} onClick={this.refreshClicked.bind(this)}><Refresh/></Button>
-                  <Button disabled={!this.state.story.pauseButtonActive} className={this.state.speed === 'PAUSE' ? 'selectedButton' : null} onClick={this.pause.bind(this)}><Pause/></Button>
-                  <Button disabled={!this.state.story.playButtonActive} className={this.state.speed === 'NORMAL' ? 'selectedButton' : null} onClick={this.play.bind(this)}><PlayArrow/></Button>
-                  <Button disabled={!this.state.story.playButtonActive} className={this.state.speed === 'FASTER' ? 'selectedButton' : null} onClick={this.faster.bind(this)}><SkipNext/></Button>
-                  <Button disabled={!this.state.story.testButtonActive} onClick={this.toggleTesting.bind(this)}>Test!</Button>
+                  <Button alt="Restart The Game" disabled={!this.state.story.resetButtonActive} onClick={this.refreshClicked.bind(this)}><Refresh/></Button>
+                  <Button alt="Pause The Game" disabled={!this.state.story.pauseButtonActive} className={this.state.speed === 'PAUSE' ? 'selectedButton' : null} onClick={this.pause.bind(this)}><Pause/></Button>
+                  <Button alt="Resume The Game" disabled={!this.state.story.playButtonActive} className={this.state.speed === 'NORMAL' ? 'selectedButton' : null} onClick={this.play.bind(this)}><PlayArrow/></Button>
+                  <Button alt="Speed Up The Game" disabled={!this.state.story.playButtonActive} className={this.state.speed === 'FASTER' ? 'selectedButton' : null} onClick={this.faster.bind(this)}><SkipNext/></Button>
+                  <Button alt="Test Out My Model" disabled={!this.state.story.testButtonActive} onClick={this.toggleTesting.bind(this)}>Test!</Button>
                 </Grid>
               </Grid>
               <Grid item xs={12}>
