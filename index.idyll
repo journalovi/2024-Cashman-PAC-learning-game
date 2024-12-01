@@ -269,7 +269,9 @@ We can use the PAC learning paradigm to analyze our algorithms.  In particular, 
   onEnterView: `pac_learning_2++` scrolloffset:300
 /]
 
-First, we note that the tightest-fit rectangle is always contained in the target rectangle.  We can express the total error region as four strips: the strips above, below, to the left, and to the right of the tightest-fit rectangle.  This is the only region where our algorithm will label incorrectly.  To proceed, we determine the probability that the size of each region is [Equation]\leq \frac{\epsilon}{4}[/Equation], so that the total error is less than [Equation]\epsilon[/Equation].  This will give us a relationship between [Equation]\epsilon[/Equation] and [Equation]\delta[/Equation] in terms of the nubmer of samples drawn, [Equation]M[/Equation].
+First, we note that the tightest-fit rectangle is always contained in the target rectangle.  We can express the total error region as four strips: the strips above, below, to the left, and to the right of the tightest-fit rectangle.  This is the only region where our algorithm will label incorrectly.  To proceed, we would like it if the size of each region is bounded above [Equation]\leq \frac{\epsilon}{4}[/Equation], so that the total size of the error regions is less than [Equation]\epsilon[/Equation].  If the data is uniformly distributed, we can try to count how many random samples we would generally need to receive labels for before we would be pretty sure that we would receive points in these error regions.  This will give us a relationship between [Equation]\epsilon[/Equation] and [Equation]\delta[/Equation] in terms of the number of samples drawn, [Equation]M[/Equation].
+
+[SectionDivider /]
 
 [var name:"pac_learning_3" value:0 /]
 [GameChanger 
@@ -283,6 +285,8 @@ First, we note that the tightest-fit rectangle is always contained in the target
 /]
 
 Consider the top strip, which we'll call T'.  Then, consider the strip T that starts from the top of the proposal region, and sweeps down in height until it has area [Equation]\frac{\epsilon}{4}[/Equation].  **If T' is contained in T, then it has area less than [Equation]\frac{\epsilon}{4}[/Equation], and we are done**.  By our algorithm, we know that our T' can only be greater in area than T if we haven't seen any samples in T, since if we had, then our proposal region would contain that point.  The probability that M independent draws from the distribution (i.e. new points that we see) all miss the region T (and thus that the area is less than [Equation]\frac{\epsilon}{4}[/Equation]) is exactly [Equation](1 - \frac{\epsilon}{4})^M[/Equation].  
+
+[SectionDivider /]
 
 [var name:"pac_learning_4" value:0 /]
 [GameChanger 
@@ -303,7 +307,7 @@ The final step of the proof is to determine how many samples we'd need - solving
 
 ## Assuming the Worst
 
-As the old saying goes: Don't Assume.  It makes an ass out of you and me.  And our proof involved many assumptions that may not be so realistic, if we imagine proving something similar for a more applied case.
+As the old saying goes: Don't Assume.  It makes an ass out of you and me.  And our proof involved many assumptions that may not be so realistic, if we imagine proving something similar for a more applied case.   
 
 While the proof contains some complicated logic, and our conclusion can be hard to interpret, it was actually a significant result.  For this very simple problem (much simpler than the types of problems machine learning is being used to solve in the real world), we were able to show that the error on unseen examples would be bounded.  
 
@@ -322,7 +326,7 @@ But not so fast - there's a major issue that we didn't mention.  The proof we we
   onEnterView: `iid++` scrolloffset:300
 /]
 
-That the sampled data in independent and identically distributed (typically referred to as i.i.d).  In real world data, this may not be the case; if the algorithm is being trained on streamed data, it typically cannot be considered independent draws.  This assumption was used in our probability bounds.
+That the sampled data in independent and identically distributed (typically referred to as i.i.d).  In real world data, this may not be the case; if the algorithm is being trained on streamed data, it typically cannot be considered independent draws.  As a more practical example, suppose our training data was patient visits to a doctors office, in chronological order.  This data would have some sort of seasonality to it - the visits in the winter would typically involve fevers and respiratory problems, while the visits in the summer would involve more sports-related accidents.  This would violate the i.i.d. assumption because we wouldn't be able to know that the training points we had seen would have bearing on the training points we were going to see in the future.  This assumption was used in our probability bounds.
 
 In this version of the game, the i.i.d. assumption is violated by placing some linear drift on the data.  As we get new points, they move linearly in a certain direction.
 
@@ -359,7 +363,7 @@ In this version of the game, the training distribution and the testing distribut
   onEnterView: `incorrect_model_class++` scrolloffset:300
 /]
 
-Our proof assumed that we already knew that the type of region we were looking for was a rectangle.  But in practice, we rarely know what kind of machine learning model will match the phenomenon being modeled in the data.  Suppose, instead of a rectangular region, the region we were looking for turned out to be an ellipse, or a parallellogram, or even an arbitrary, amorphous disconnected region.  A geometric proof would then be much harder, or even impossible.
+Our proof assumed that we already knew that the type of region we were looking for was a rectangle.  But in practice, we rarely know what kind of machine learning model will match the phenomenon being modeled in the data.  Suppose, instead of a rectangular region, the region we were looking for turned out to be an ellipse, or a parallellogram, or even an arbitrary, amorphous disconnected region.  A geometric proof would then be much harder, or even impossible.  The field of adversarial machine learning gives us practical examples.  For example, small amounts of noise added in to images that change the label of images take advantage of the high-dimensional decision boundaries found in convolutional neural nets, as in [link text: "Tabacof and Valle (2016)" url: "https://ieeexplore.ieee.org/abstract/document/7727230" /]
 
 In this version of the game, the actual region we are trying to guess is an ellipse, but we can only choose a rectangle.  Play it a few times and notice that no matter how good your guess is, you will always have some nonzero lower bound on your testing error.
 
@@ -403,6 +407,8 @@ Thank you to Anselm Blumer and the reviewers from VisXAI.
 - Fujiyoshi, Hironobu, Tsubasa Hirakawa, and Takayoshi Yamashita. "Deep learning-based image recognition for autonomous driving." IATSS research 43.4 (2019): 244-252.
 - Buolamwini, Joy, and Timnit Gebru. "Gender shades: Intersectional accuracy disparities in commercial gender classification." Conference on fairness, accountability and transparency. PMLR, 2018.
 - Wolpert, David H., and William G. Macready. "No free lunch theorems for optimization." IEEE transactions on evolutionary computation 1.1 (1997): 67-82.
+- Tabacof, Pedro, and Eduardo Valle. "Exploring the space of adversarial images." 2016 international joint conference on neural networks (IJCNN). IEEE, 2016.
+
 
 ## Research Material Statements
 
