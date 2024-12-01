@@ -15,18 +15,18 @@
 
 - [] Move details to annotations to make it more readable
 - [x] Proofread the text
-- [] Fix calculations of test error for when there are no points
+- [x] Fix calculations of test error for when there are no points
 - [] Fix scroll offset for the scroller buttons
 - [x] Add a gamechanger button at the top
-- [] Consider adding a table of contents?
-- [] Consider adding an info button?
+- [x] Consider adding a table of contents?
+- [x] Consider adding an info button?
 - [] speed seems to be too fast when we get to the bottom.
 
 Deploy via https://gist.github.com/cobyism/4730490
 
 ## JOVI
 
-- [] At a high level, R1 and R2 request more details and instructions on how the game works in the introduction (#5, #6).
+- [x] At a high level, R1 and R2 request more details and instructions on how the game works in the introduction (#5, #6).
 - []  At a low level, several technical issues were raised. R2 notes that the fade in animation for points can be confusing (#6). R3 perceived a difference between the points displayed thus far and the final set of points displayed after clicking the "TEST!" button (#7) I noticed that when no rectangle is drawn in the game, an error is thrown when I hit the "TEST!" button. R1 and R2 observed a similar issue (#5, #6).
 - [] These suggestions are optional, but reviewers also mentioned potential enhancements. For example, R3 suggests visualizing true/false positives and negatives to enhance clarity (#7). R1 also suggests some enhancements to make the game more personalized and game-like (#5).
 - [] R1 and R2 find the Introduction -"Why this is important" section to be a bit too abstract (#5, #6). Further, R2 finds the current positioning of the Gender Shade example to be confusing/misleading (#6).
