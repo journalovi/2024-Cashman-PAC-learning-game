@@ -80,8 +80,9 @@ This game can be used to illustrate many concepts of one of the underlying theor
 
 ### Why this is important
 
-Machine Learning algorithms are becoming ubiquitous tools in the age of big data to aid in decision making and data analysis. 
-They are actively being deployed in scenarios where their impact directly effects humans,including 
+Machine Learning algorithms are becoming ubiquitous tools in the age of big data to aid in decision making and data analysis.  They can be deployed in complex situations where the data they are acting on has different qualities than the data they were training on.  A common example is e-mail spam filters: the text of many spam emails was used to train spam filters.  However, since the strategies used by e-mail spammers evolve over time, the training dataset might not be representative of newer spam emails, so those emails get through.  Understanding the ways in which machine learning algorithms can have worse performance than we expect is important to designing more resilient algorithms.
+
+This is increasingly important as Machine Learning models are responsible for broader use cases.  They are actively being deployed in scenarios where their impact directly effects humans,including 
 [link text:"self-driving cars" url:"https://arxiv.org/abs/1901.04407" /], 
 [link text: "patient triaging software at hospitals" url:"https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0205836" /], and even [link text: "crime prediction software" url: "https://link.springer.com/chapter/10.1007/978-3-030-14680-1_40" /], a la [link text: "Minority Report" url: "https://www.imdb.com/title/tt0181689/" /].  Automation from deep learning models such as [link text: "facial recognition technology" url: "https://www.gao.gov/products/gao-22-106100" /], [link text: "image and scene classification" url: "https://www.sciencedirect.com/science/article/pii/S0386111219301566" /], and [link text: "text generation through large language models" url: "https://openai.com/blog/chatgpt" /] are rapidly eclipsing levels of human competency and changing the way we live our lives.
 
@@ -90,7 +91,7 @@ When we deploy machine learning algorithms out in the wild, how do we *know* tha
 
 The answer, of course, is that we don't know for sure the models will work as intended.  
 We train models on an available dataset, and then hope that the model's performance on a portion of that dataset is representative 
-on however that model will be used out in the wild.  This can fail spectacularly, though: [link text: "A recent project called called Gender Shades by Joy Buolamwini et al." url: "http://gendershades.org/" /] at the Massachusetts Institute of Technology discovered that commercial gender classification systems have less than one percent error on lighter-skinned males, and up to 35% error on darker-skinned females, presumably because they were trained on datasets that were biased towards light-skinned males.  Because the training sets were imbalanced and not representative of the general population, the tool performed much worse in practice than we can imagine its creators assumed it would perform.
+on however that model will be used out in the wild.  If a model is deployed out in the world in a way that it will face very different data than the data it is trained on, then it could perform much worse than it was observed performing during training.
 
 It is important for the general public to understand that machine learning algorithms make mistakes.  And it is *crucial* for decision makers to understand *why* machine learning models can perform worse when deployed in the real world, so that they can make informed decisions about deploying these models in high-risk environments.  In hindsight, it might seem obvious that the training data of facial recognition algorithms could lead to a bias in a deployed system.  PAC learning, however, will provide us foresight to anticipate these types of risks before building a model.  And this article will illustrate what that means. 
 
