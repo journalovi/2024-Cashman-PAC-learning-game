@@ -101,7 +101,7 @@ class PacScatter extends D3Component {
     }
 
     this.setState((state, props) => { return { dataQueue: this.generatedTrainData.slice(),
-                    candidateDistribution: null
+                    candidateDistribution: { x: { min: 0.5, max: 0.5 }, y: { min: 0.5, max: 0.5 } }
                   }},
                   () => {
                     if (this.props.drawAllPoints) {
@@ -125,8 +125,8 @@ class PacScatter extends D3Component {
       drawnPoints: [],
       trainingPoints: [],
       lastSpeed: 'PAUSE',
-      candidateDistribution: null
-      // candidateDistribution: { x: { min: 0.0, max: 1.0 }, y: { min: 0.0, max: 1.0 } }
+      // candidateDistribution: null
+      candidateDistribution: { x: { min: 0.5, max: 0.5 }, y: { min: 0.5, max: 0.5 } } // initialized to empty box
     }
     this.groundTruthBox = React.createRef();
     this.svg = React.createRef();
@@ -393,6 +393,7 @@ class PacScatter extends D3Component {
         // console.log("and after, this is ", this)
       }
       const datum = this.state.dataQueue.pop();
+      console.log("datum is ", datum)
       this.setState((state, props) => { return { drawnPoints: state.drawnPoints.concat([datum]) } },
         () => { 
           this.props.incrementSamples();
@@ -484,7 +485,7 @@ class PacScatter extends D3Component {
     // Here, we're going to calculate the areas of the confusion matrix:
     // TP, TN, FP, TN, Accuracy
     // Where the confusion matrix is percentages
-
+    console.log("this.state.candidateDistribution is ", this.state.candidateDistribution, " and this.targetTestDistribution is ", this.targetTestDistribution);
     if (this.props.targetTestDistributionType === 'rectangle') {
       return this.calculateErrorRectangle(this.state.candidateDistribution, this.targetTestDistribution);
     } else if (this.props.targetTestDistributionType === 'ellipse') {
