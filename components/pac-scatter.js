@@ -33,11 +33,11 @@ class PacScatter extends D3Component {
 
     // setup fill color
     this.cValue = (d) => { return d.label ? 'green' : 'red';};
+    this.shapeValue = (d) => { return d.label ? d3.symbol().type(d3.symbolCircle) : d3.symbol().type(d3.symbolCross) };
 
     // Generating the random data
     // First, generate the bounds.
     this.outerBounds = { x: { min: 0.0, max: 1.0 }, y: { min: 0.0, max: 1.0 } };
-    console.log("Calling initializeDistributions from initializeData")
     this.initializeDistributions.bind(this)();
   }
 
@@ -166,12 +166,10 @@ class PacScatter extends D3Component {
   }
 
   update(props, oldProps) {
-    console.log("setRefresh is ", props.setRefresh)
     if (props.setRefresh) {
       this.clearBrush.bind(this)()
       if (!(props.staticDataset && oldProps.staticDataset)) {
         // We don't want to reset the dataset if its just going from static to static
-        console.log("Calling initializeDistributions from update with testing as ", oldProps.testing)
         this.initializeDistributions.bind(this)(props.staticDataset, !oldProps.testing);
         this.eraseAllPoints.bind(this)()        
       }
@@ -284,7 +282,7 @@ class PacScatter extends D3Component {
       // We've switched from training to testing
       this.setState((state, props) => { return { dataQueue: this.generatedTestData.slice()}},
         () => {
-          // First, remove all circles
+          // First, remove all paths
           this.eraseAllPoints();
 
           this.animatePoints('FINISH');
@@ -297,7 +295,6 @@ class PacScatter extends D3Component {
     if ((oldProps.speed === 'PAUSE' || !globalStarted) && props.speed !== 'PAUSE') {
       globalStarted = true;
       this.state.lastSpeed = props.speed;
-      console.log("restarting animation here")
       this.animatePoints(props.speed);
     }
   }
@@ -330,7 +327,6 @@ class PacScatter extends D3Component {
  }
 
   animatePoints(speed='NORMAL') {
-    console.log("CALLING animatePoints()");
     if (this.state.dataQueue.length > 0) {
       globalStarted = true;
       setTimeout(
@@ -355,7 +351,7 @@ class PacScatter extends D3Component {
   }
 
   eraseAllPoints() {
-    this.svg.selectAll('circle')
+    this.svg.selectAll('path')
       .attr("r", 3.5)
       .transition()
       .duration(500)
@@ -368,7 +364,6 @@ class PacScatter extends D3Component {
   }
 
   drawNextPoint() {
-    // console.log("test distribution is ", this.targetTestDistribution)
     if (this.props.generatePoints) {
       if (this.props.temporalDrift) {
         // Increment everything in the dataQueue, as well as the testing distribution.
@@ -393,7 +388,6 @@ class PacScatter extends D3Component {
         // console.log("and after, this is ", this)
       }
       const datum = this.state.dataQueue.pop();
-      console.log("datum is ", datum)
       this.setState((state, props) => { return { drawnPoints: state.drawnPoints.concat([datum]) } },
         () => { 
           this.props.incrementSamples();
@@ -404,19 +398,24 @@ class PacScatter extends D3Component {
           }
         }
       );
-
-      this.svg.append("circle")
-        .attr("class", "dot")
-        .attr("cx", this.xMap(datum))
-        .attr("cy", this.yMap(datum))
+      console.log("d3 is ", d3);
+      console.log("d3.symbolCross is ", d3.symbolCross)
+      console.log("d3.symbols is ", d3.symbols)
+      this.svg.append("path")
+        // .attr("class", "dot")
+        .attr("d", this.shapeValue(datum))
+        .attr(
+          "transform",
+          `translate(${this.xMap(datum)}, ${this.yMap(datum)})`
+        )
         .style("fill", this.cValue(datum)) 
-        .attr("r", 0.5)
-        .transition()
-        .duration(1000)
-        .attr("r", 5.5)
-        .transition()
-        .duration(1000)
-        .attr("r", 3.5);
+        // .attr("r", 0.5)
+        // .transition()
+        // .duration(1000)
+        // .attr("r", 5.5)
+        // .transition()
+        // .duration(1000)
+        // .attr("r", 3.5);
     }
   }
 
@@ -424,20 +423,23 @@ class PacScatter extends D3Component {
     // const totalDataLength = this.state.data.length;
     // const totalDrawnLength = this.state.drawnPoints.length;
     // const numPoints = totalDataLength - totalDrawnLength;
-    // console.log("we are in drawAllPoints()")
     // for (let i = 0; i < numPoints; i++) {
     //   console.log("drawing the next point!")
     //   this.drawNextPoint();
     // }
     this.setState({drawnPoints: this.state.data})
-
     this.svg.selectAll(".dot")
       .data(this.state.data)
-      .enter().append("circle")
-      .attr("class", "dot")
-      .attr("r", 3.5)
-      .attr("cx", this.xMap)
-      .attr("cy", this.yMap)
+      .enter().append("path")
+      .attr("d", (d) => { return this.shapeValue(d) })
+      .attr(
+        "transform",
+        `translate(${this.xMap(datum)}, ${this.yMap(datum)})`
+      )
+      // .attr("class", "dot")
+      // .attr("r", 3.5)
+      // .attr("cx", this.xMap)
+      // .attr("cy", this.yMap)
       .style("fill", (d) => { return this.cValue(d);}) 
   }
 
@@ -485,7 +487,6 @@ class PacScatter extends D3Component {
     // Here, we're going to calculate the areas of the confusion matrix:
     // TP, TN, FP, TN, Accuracy
     // Where the confusion matrix is percentages
-    console.log("this.state.candidateDistribution is ", this.state.candidateDistribution, " and this.targetTestDistribution is ", this.targetTestDistribution);
     if (this.props.targetTestDistributionType === 'rectangle') {
       return this.calculateErrorRectangle(this.state.candidateDistribution, this.targetTestDistribution);
     } else if (this.props.targetTestDistributionType === 'ellipse') {
@@ -546,7 +547,6 @@ class PacScatter extends D3Component {
     if (this.props.targetTestDistributionType === 'rectangle') {
       this.drawTargetDistributionRectangle(forceDraw, targetDistribution);
     } else if (this.props.targetTestDistributionType === 'ellipse') {
-      console.log("drawing ellipse")
       this.drawTargetDistributionEllipse(forceDraw);
     }
   }
@@ -705,7 +705,6 @@ class PacScatter extends D3Component {
   }
 
   generateUniformRandomPt(shapeBounds, outerBounds, region='rectangle') {
-    console.log("generating random pt with region ", region)
     const outerXMin = outerBounds.x.min,
     outerXMax = outerBounds.x.max,
     outerYMin = outerBounds.y.min,
