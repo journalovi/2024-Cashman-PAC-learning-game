@@ -362,7 +362,8 @@ class PacScatter extends D3Component {
       .attr("r", 0.5)
       .remove();
 
-    this.setState({drawnPoints: [], trainingPoints: []});
+    this.setState({trainingPoints: this.state.drawnPoints.slice()})
+    this.setState({drawnPoints: []});
     this.props.resetSamples();
   }
 

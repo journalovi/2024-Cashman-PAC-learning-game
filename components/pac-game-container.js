@@ -473,15 +473,27 @@ class PacGameContainer extends React.Component {
   }
 
   incrementSamples() {
-    this.setState((state, props) => {
-      return {n_samples: state.n_samples += 1, training_samples: state.training_samples += 1}
-    });      
+    if (this.state.testing) {
+      this.setState((state, props) => {
+        return {n_samples: state.n_samples += 1}
+      });
+    } else {
+      this.setState((state, props) => {
+        return {n_samples: state.n_samples += 1, training_samples: state.training_samples += 1}
+      });
+    }
   }
 
   resetSamples() {
-    this.setState((state, props) => {
-      return {n_samples: 0, training_samples: 0}
-    });
+    if (this.state.testing) {
+      this.setState((state, props) => {
+        return {n_samples: 0, training_samples: state.n_samples}
+      });
+    } else {
+      this.setState((state, props) => {
+        return {n_samples: 0, training_samples: 0}
+      });
+    }
   }
 
   resetRefresh() {
@@ -569,7 +581,7 @@ class PacGameContainer extends React.Component {
                     <Grid container space={2}>
                       <Grid item xs={12}>
                         <div className='evaluation-accuracy'>
-                          <span className='accuracy-span'>Seen <b>{this.state.n_samples}</b> out of {this.state.total_samples} total training samples.</span>
+                          <span className='accuracy-span'>Seen <b>{this.state.training_samples}</b> out of {this.state.total_samples} total training samples.</span>
                         </div>
                       </Grid>
                       <Grid item xs={12}>
