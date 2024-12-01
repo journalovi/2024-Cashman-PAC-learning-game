@@ -5,6 +5,8 @@ const d3 = require('d3');
 import conf from './pac-conf';
 import tenSamplesData from './ten-samples-data';
 
+let globalStarted = false;
+
 class PacScatter extends D3Component {
 
   updateTime(speed) {
@@ -35,10 +37,11 @@ class PacScatter extends D3Component {
     // Generating the random data
     // First, generate the bounds.
     this.outerBounds = { x: { min: 0.0, max: 1.0 }, y: { min: 0.0, max: 1.0 } };
+    console.log("Calling initializeDistributions from initializeData")
     this.initializeDistributions.bind(this)();
   }
 
-  initializeDistributions(isStatic=false) {
+  initializeDistributions(isStatic=false, skipAnimation=false) {
 
     if (this.props.targetTrainDistribution) {
       this.targetTrainDistribution = this.props.targetTrainDistribution;
@@ -103,7 +106,7 @@ class PacScatter extends D3Component {
                   () => {
                     if (this.props.drawAllPoints) {
                       this.drawAllPoints();
-                    } else if (this.props.speed !== 'PAUSE') {
+                    } else if (this.props.speed !== 'PAUSE' && this.state.lastSpeed == 'PAUSE' && !skipAnimation) {
                       this.animatePoints();
                     }
                 
@@ -120,6 +123,7 @@ class PacScatter extends D3Component {
       data: [],
       dataQueue: [],
       drawnPoints: [],
+      trainingPoints: [],
       lastSpeed: 'PAUSE',
       candidateDistribution: null
       // candidateDistribution: { x: { min: 0.0, max: 1.0 }, y: { min: 0.0, max: 1.0 } }
@@ -128,7 +132,6 @@ class PacScatter extends D3Component {
     this.svg = React.createRef();
     this.brushG = React.createRef();
 
-    // JAVASCRIPT IS AWFUL
     this.animatePoints = this.animatePoints.bind(this);
   }
 
@@ -151,6 +154,7 @@ class PacScatter extends D3Component {
       data: [],
       dataQueue: [],
       drawnPoints: [],
+      trainingPoints: [],
       lastSpeed: 'PAUSE',
       timerStarted: false
     }
@@ -162,13 +166,17 @@ class PacScatter extends D3Component {
   }
 
   update(props, oldProps) {
+    console.log("setRefresh is ", props.setRefresh)
     if (props.setRefresh) {
       this.clearBrush.bind(this)()
       if (!(props.staticDataset && oldProps.staticDataset)) {
         // We don't want to reset the dataset if its just going from static to static
-        this.initializeDistributions.bind(this)(props.staticDataset);
+        console.log("Calling initializeDistributions from update")
+
+        this.initializeDistributions.bind(this)(props.staticDataset, true);
         this.eraseAllPoints.bind(this)()        
       }
+      this.setState({lastSpeed:'PAUSE'});
       this.props.resetRefresh();
     }
     this.svg.selectAll(".candidate-distribution").remove();
@@ -287,8 +295,10 @@ class PacScatter extends D3Component {
       )    
     }
 
-    if ((oldProps.speed === 'PAUSE' || this.state.timerStarted == false) && props.speed !== 'PAUSE') {
+    if ((oldProps.speed === 'PAUSE' || !globalStarted) && props.speed !== 'PAUSE') {
+      globalStarted = true;
       this.state.lastSpeed = props.speed;
+      console.log("restarting animation here")
       this.animatePoints(props.speed);
     }
   }
@@ -321,7 +331,9 @@ class PacScatter extends D3Component {
  }
 
   animatePoints(speed='NORMAL') {
+    console.log("CALLING animatePoints()");
     if (this.state.dataQueue.length > 0) {
+      globalStarted = true;
       setTimeout(
         function() {
           if (speed === 'PAUSE') {
@@ -350,7 +362,7 @@ class PacScatter extends D3Component {
       .attr("r", 0.5)
       .remove();
 
-    this.setState({drawnPoints: []});
+    this.setState({drawnPoints: [], trainingPoints: []});
     this.props.resetSamples();
   }
 
