@@ -54,11 +54,13 @@
 .pac-game-container .candidate-distribution-t-text {
   color: brown !important;
   fill: brown !important;
+  font-size: 2em;
 }
 
 .pac-game-container .candidate-distribution-tprime-text {
   color: purple !important;
   fill: purple !important;
+  font-size: 2em;
 }
 
 .pac-game-container .candidate-distribution-tprime {
