@@ -171,9 +171,8 @@ class PacScatter extends D3Component {
       this.clearBrush.bind(this)()
       if (!(props.staticDataset && oldProps.staticDataset)) {
         // We don't want to reset the dataset if its just going from static to static
-        console.log("Calling initializeDistributions from update")
-
-        this.initializeDistributions.bind(this)(props.staticDataset, true);
+        console.log("Calling initializeDistributions from update with testing as ", oldProps.testing)
+        this.initializeDistributions.bind(this)(props.staticDataset, !oldProps.testing);
         this.eraseAllPoints.bind(this)()        
       }
       this.setState({lastSpeed:'PAUSE'});
@@ -342,6 +341,7 @@ class PacScatter extends D3Component {
             this.state.timerStarted = true;
             this.drawNextPoint.bind(this)();
             if (speed === 'FINISH') {
+              globalStarted = false;
               this.animatePoints('FINISH');
             } else {
               this.animatePoints(this.props.speed);
