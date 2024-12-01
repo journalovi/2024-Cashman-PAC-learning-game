@@ -5,6 +5,8 @@ const d3 = require('d3');
 import conf from './pac-conf';
 import tenSamplesData from './ten-samples-data';
 
+let globalStarted = false;
+
 class PacScatter extends D3Component {
 
   updateTime(speed) {
@@ -35,10 +37,11 @@ class PacScatter extends D3Component {
     // Generating the random data
     // First, generate the bounds.
     this.outerBounds = { x: { min: 0.0, max: 1.0 }, y: { min: 0.0, max: 1.0 } };
+    console.log("Calling initializeDistributions from initializeData")
     this.initializeDistributions.bind(this)();
   }
 
-  initializeDistributions(isStatic=false) {
+  initializeDistributions(isStatic=false, skipAnimation=false) {
 
     if (this.props.targetTrainDistribution) {
       this.targetTrainDistribution = this.props.targetTrainDistribution;
@@ -98,12 +101,12 @@ class PacScatter extends D3Component {
     }
 
     this.setState((state, props) => { return { dataQueue: this.generatedTrainData.slice(),
-                    candidateDistribution: null
+                    candidateDistribution: { x: { min: 0.5, max: 0.5 }, y: { min: 0.5, max: 0.5 } }
                   }},
                   () => {
                     if (this.props.drawAllPoints) {
                       this.drawAllPoints();
-                    } else if (this.props.speed !== 'PAUSE') {
+                    } else if (this.props.speed !== 'PAUSE' && this.state.lastSpeed == 'PAUSE' && !skipAnimation) {
                       this.animatePoints();
                     }
                 
@@ -120,15 +123,15 @@ class PacScatter extends D3Component {
       data: [],
       dataQueue: [],
       drawnPoints: [],
+      trainingPoints: [],
       lastSpeed: 'PAUSE',
-      candidateDistribution: null
-      // candidateDistribution: { x: { min: 0.0, max: 1.0 }, y: { min: 0.0, max: 1.0 } }
+      // candidateDistribution: null
+      candidateDistribution: { x: { min: 0.5, max: 0.5 }, y: { min: 0.5, max: 0.5 } } // initialized to empty box
     }
     this.groundTruthBox = React.createRef();
     this.svg = React.createRef();
     this.brushG = React.createRef();
 
-    // JAVASCRIPT IS AWFUL
     this.animatePoints = this.animatePoints.bind(this);
   }
 
@@ -151,6 +154,7 @@ class PacScatter extends D3Component {
       data: [],
       dataQueue: [],
       drawnPoints: [],
+      trainingPoints: [],
       lastSpeed: 'PAUSE',
       timerStarted: false
     }
@@ -162,13 +166,16 @@ class PacScatter extends D3Component {
   }
 
   update(props, oldProps) {
+    console.log("setRefresh is ", props.setRefresh)
     if (props.setRefresh) {
       this.clearBrush.bind(this)()
       if (!(props.staticDataset && oldProps.staticDataset)) {
         // We don't want to reset the dataset if its just going from static to static
-        this.initializeDistributions.bind(this)(props.staticDataset);
+        console.log("Calling initializeDistributions from update with testing as ", oldProps.testing)
+        this.initializeDistributions.bind(this)(props.staticDataset, !oldProps.testing);
         this.eraseAllPoints.bind(this)()        
       }
+      this.setState({lastSpeed:'PAUSE'});
       this.props.resetRefresh();
     }
     this.svg.selectAll(".candidate-distribution").remove();
@@ -287,8 +294,10 @@ class PacScatter extends D3Component {
       )    
     }
 
-    if ((oldProps.speed === 'PAUSE' || this.state.timerStarted == false) && props.speed !== 'PAUSE') {
+    if ((oldProps.speed === 'PAUSE' || !globalStarted) && props.speed !== 'PAUSE') {
+      globalStarted = true;
       this.state.lastSpeed = props.speed;
+      console.log("restarting animation here")
       this.animatePoints(props.speed);
     }
   }
@@ -321,7 +330,9 @@ class PacScatter extends D3Component {
  }
 
   animatePoints(speed='NORMAL') {
+    console.log("CALLING animatePoints()");
     if (this.state.dataQueue.length > 0) {
+      globalStarted = true;
       setTimeout(
         function() {
           if (speed === 'PAUSE') {
@@ -330,6 +341,7 @@ class PacScatter extends D3Component {
             this.state.timerStarted = true;
             this.drawNextPoint.bind(this)();
             if (speed === 'FINISH') {
+              globalStarted = false;
               this.animatePoints('FINISH');
             } else {
               this.animatePoints(this.props.speed);
@@ -350,6 +362,7 @@ class PacScatter extends D3Component {
       .attr("r", 0.5)
       .remove();
 
+    this.setState({trainingPoints: this.state.drawnPoints.slice()})
     this.setState({drawnPoints: []});
     this.props.resetSamples();
   }
@@ -380,6 +393,7 @@ class PacScatter extends D3Component {
         // console.log("and after, this is ", this)
       }
       const datum = this.state.dataQueue.pop();
+      console.log("datum is ", datum)
       this.setState((state, props) => { return { drawnPoints: state.drawnPoints.concat([datum]) } },
         () => { 
           this.props.incrementSamples();
@@ -471,7 +485,7 @@ class PacScatter extends D3Component {
     // Here, we're going to calculate the areas of the confusion matrix:
     // TP, TN, FP, TN, Accuracy
     // Where the confusion matrix is percentages
-
+    console.log("this.state.candidateDistribution is ", this.state.candidateDistribution, " and this.targetTestDistribution is ", this.targetTestDistribution);
     if (this.props.targetTestDistributionType === 'rectangle') {
       return this.calculateErrorRectangle(this.state.candidateDistribution, this.targetTestDistribution);
     } else if (this.props.targetTestDistributionType === 'ellipse') {

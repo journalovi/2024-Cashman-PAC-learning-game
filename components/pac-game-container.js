@@ -39,6 +39,7 @@ class PacGameContainer extends React.Component {
       showCandidate: false,
       resetData: false,
       n_samples: 0,
+      training_samples: 0,
       total_samples: 100,
       testing: false,
       xAxisName: 'Weight (lbs)',
@@ -61,6 +62,7 @@ class PacGameContainer extends React.Component {
       },
       sampleError: "N/A",
       testError: "N/A",
+      setRefresh: false
     }
   }
 
@@ -91,7 +93,7 @@ class PacGameContainer extends React.Component {
     // Here, we unwrap the game state.  Each game state has some specific rules.
     switch (this.props.gamestate) {
       case 'beginning': 
-        this.refresh();
+        // this.refresh();
         this.setState(this.initialStory());
       break;
       case 'no_free_lunch':
@@ -471,15 +473,27 @@ class PacGameContainer extends React.Component {
   }
 
   incrementSamples() {
-    this.setState((state, props) => {
-      return {n_samples: state.n_samples += 1}
-    });      
+    if (this.state.testing) {
+      this.setState((state, props) => {
+        return {n_samples: state.n_samples += 1}
+      });
+    } else {
+      this.setState((state, props) => {
+        return {n_samples: state.n_samples += 1, training_samples: state.training_samples += 1}
+      });
+    }
   }
 
   resetSamples() {
-    this.setState((state, props) => {
-      return {n_samples: 0}
-    });
+    if (this.state.testing) {
+      this.setState((state, props) => {
+        return {n_samples: 0, training_samples: state.n_samples}
+      });
+    } else {
+      this.setState((state, props) => {
+        return {n_samples: 0, training_samples: 0}
+      });
+    }
   }
 
   resetRefresh() {
@@ -567,6 +581,11 @@ class PacGameContainer extends React.Component {
                     <Grid container space={2}>
                       <Grid item xs={12}>
                         <div className='evaluation-accuracy'>
+                          <span className='accuracy-span'>Seen <b>{this.state.training_samples}</b> out of {this.state.total_samples} total training samples.</span>
+                        </div>
+                      </Grid>
+                      <Grid item xs={12}>
+                        <div className='evaluation-accuracy'>
                           <span className='accuracy-span'>Total Training Error: {this.state.sampleStatistics.error.toFixed(2)}%</span>
                         </div>
                       </Grid>
@@ -596,6 +615,11 @@ class PacGameContainer extends React.Component {
                 <Grid item xs={6}>
                   <div className='evaluation-statistics evaluation-statistics-testing'>
                     <Grid container space={2}>
+                      <Grid item xs={12}>
+                        <div className='evaluation-accuracy'>
+                          <span className='accuracy-span'>Seen <b>{this.state.testing ? this.state.total_samples : 0}</b> out of {this.state.total_samples} total testing samples.</span>
+                        </div>
+                      </Grid>
                       <Grid item xs={12}>
                         <div className='evaluation-accuracy'>
                           <span className='accuracy-span'>Total Testing Error: {this.state.testStatistics.error.toFixed(2)}%</span>
