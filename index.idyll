@@ -82,7 +82,7 @@ This game can be used to illustrate many concepts of one of the underlying theor
 
 ### Why this is important
 
-Machine Learning algorithms are becoming ubiquitous tools in the age of big data to aid in decision making and data analysis.  They can be deployed in complex situations where the data they are acting on has different qualities than the data they were training on.  A common example is e-mail spam filters: the text of many spam emails was used to train spam filters.  However, since the strategies used by e-mail spammers evolve over time, the training dataset might not be representative of newer spam emails, so those emails get through.  Understanding the ways in which machine learning algorithms can have worse performance than we expect is important to designing more resilient algorithms.
+Machine Learning algorithms are becoming ubiquitous tools in the age of big data to aid in decision making and data analysis.  They can be deployed in complex situations where the data they are acting on has different qualities than the data they were training on.  A common example is e-mail spam filters: the text of many spam emails was used to train spam filters.  However, since the strategies used by e-mail spammers evolve over time, the training dataset might not be representative of newer spam emails, so those emails get through.  This is a manifestation of the *domain mismatch* vulnerability illustrated in this article.  Understanding the ways in which machine learning algorithms can have worse performance than we expect is important to designing more resilient algorithms.
 
 This is increasingly important as Machine Learning models are responsible for broader use cases.  They are actively being deployed in scenarios where their impact directly effects humans,including 
 [link text:"self-driving cars" url:"https://arxiv.org/abs/1901.04407" /], 
@@ -334,19 +334,19 @@ In this version of the game, the i.i.d. assumption is violated by placing some l
 
 [SectionDivider /]
 
-### Training-Testing Mismatch
+### Domain Mismatch
 
 [var name:"train_test_mismatch" value:0 /]
 [GameChanger 
   longtext: "Here, the training data comes from a different distribution than the testing."
-  shorttext: "Train Test Mismatch"
+  shorttext: "Domain Mismatch"
   gamestate: "train_test_mismatch"
   progressvar: train_test_mismatch
   parentcurrgamestate: currgamestate
   parentcurrgamemsg: currgamemsg
   onEnterView: `train_test_mismatch++` scrolloffset:300
 /]
-We assume (or at least count on) that the data that we test our algorithm on is from the same distribution that we train our algorithm on.  This assumption is frequently incorrect in practice, and can result in unexpected behavior by the machine learning algorithm.  Consider a computer vision algorithm for a self-driving car that only trained in the Pacific Northwestern United States, and then was deployed in a desert climate; the behavior of the computer vision algorithm in training might have no relationship with its behavior in testing.  This would correspond to the testing samples being labeled in a different region than during training.
+We assume (or at least count on) that the data that we test our algorithm on is from the same distribution that we train our algorithm on.  This assumption is frequently incorrect in practice, and can result in unexpected behavior by the machine learning algorithm.  This phenomenon is called *domain mismatch*, or sometimes *train test mismatch*, because the domain of the data that the model is trained on is not the same domain of data that the model will be deployed or evaluated on.  Consider a computer vision algorithm for a self-driving car that only trained in the Pacific Northwestern United States, and then was deployed in a desert climate; the behavior of the computer vision algorithm in training might have no relationship with its behavior in testing.  This would correspond to the testing samples being labeled in a different region than during training.
 
 In this version of the game, the training distribution and the testing distribution are independent of one another.  This means that the true labels (green points) that you get in training may not be representative of where the true labels would appear in the testing phase.  It makes it impossible to guarantee any performance: it's back to the No Free Lunch situation described earlier.
 
