@@ -117,7 +117,8 @@ Let's return to the game, and consider some machine learning concepts.  First, t
 
 Not very fun, or interesting, right?
 
-This is an illustration of there being [link text:"No Free Lunch theorems for optimization" url:"https://ieeexplore.ieee.org/document/585893" /].  In the absence of any information, we can do no better than random chance, and thus we can make no statements about how "correct" we are.  You might have 10% error, you might have 90% error, you might fit the rectangle perfectly and have 0 error.  
+This is an illustration of there being [link text:"No Free Lunch theorems for optimization" url:"https://ieeexplore.ieee.org/document/585893" /].  As [link text:"described by David Wolpert" url:"https://arxiv.org/pdf/2007.10928" /], a researcher in machine learning theory and author of several No Free Lunch (NFL) papers, *"the NFL theorems say that under a uniform distribution over problems (be they supervised learning problems or search problems), all algorithms perform equally."*
+In the absence of any information, we can do no better than random chance, and thus we can make no statements about how "correct" we are.  You might have 10% error, you might have 90% error, you might fit the rectangle perfectly and have 0 error.  
 
 [SectionDivider /]
 
@@ -410,6 +411,7 @@ Thank you to Anselm Blumer and the reviewers from VisXAI.
 - Fujiyoshi, Hironobu, Tsubasa Hirakawa, and Takayoshi Yamashita. "Deep learning-based image recognition for autonomous driving." IATSS research 43.4 (2019): 244-252.
 - Buolamwini, Joy, and Timnit Gebru. "Gender shades: Intersectional accuracy disparities in commercial gender classification." Conference on fairness, accountability and transparency. PMLR, 2018.
 - Wolpert, David H., and William G. Macready. "No free lunch theorems for optimization." IEEE transactions on evolutionary computation 1.1 (1997): 67-82.
+- Wolpert, David H. "What is important about the no free lunch theorems?." Black box optimization, machine learning, and no-free lunch theorems. Cham: Springer International Publishing, 2021. 373-388.
 - Tabacof, Pedro, and Eduardo Valle. "Exploring the space of adversarial images." 2016 international joint conference on neural networks (IJCNN). IEEE, 2016.
 
 
