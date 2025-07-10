@@ -211,7 +211,7 @@
   transform: translateX(-50%);
   z-index: 1000;
   width: 100%;
-  padding: 100px 15px;
+  padding: 0 15px;
   box-sizing: border-box;
 
   /* Transition for opacity and pointer-events */

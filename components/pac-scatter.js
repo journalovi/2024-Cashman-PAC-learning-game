@@ -292,6 +292,7 @@ class PacScatter extends D3Component {
           this.animatePoints('FINISH');
           this.drawTargetDistribution.bind(this)(props.testing || props.showGroundTruth);
           this.drawCandidateDistribution(props.showCandidate);
+          this.props.updateTestError(this.calculateTestError());          
         }
       )    
     }
