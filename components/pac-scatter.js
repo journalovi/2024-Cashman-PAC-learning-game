@@ -41,8 +41,8 @@ class PacScatter extends D3Component {
     this.initializeDistributions.bind(this)();
   }
 
-  initializeDistributions(isStatic=false, skipAnimation=false) {
-
+  initializeDistributions(isStatic=false, skipAnimation=false, skipAxes=false) {
+    console.log("WE ARE IN initializeDistributions!");
     if (this.props.targetTrainDistribution) {
       this.targetTrainDistribution = this.props.targetTrainDistribution;
     } else {
@@ -83,13 +83,16 @@ class PacScatter extends D3Component {
     this.setState({data: this.generatedTrainData});
     this.xScale.domain([this.outerBounds.x.min, this.outerBounds.x.max]);
     this.yScale.domain([this.outerBounds.y.min, this.outerBounds.y.max]);
-    this.svg.append("g")
-      .attr("class", "x axis")
-      .attr("transform", "translate(0," + this.height + ")")
-      .call(this.xAxis);
-    this.svg.append("g")
-      .attr("class", "y axis")
-      .call(this.yAxis)
+
+    if (!skipAxes) {
+      this.svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + this.height + ")")
+        .call(this.xAxis);
+      this.svg.append("g")
+        .attr("class", "y axis")
+        .call(this.yAxis)      
+    }
 
     this.brush = d3.brush()
     .extent([[0, 0], [this.width, this.height]])
@@ -170,7 +173,7 @@ class PacScatter extends D3Component {
       this.clearBrush.bind(this)()
       if (!(props.staticDataset && oldProps.staticDataset)) {
         // We don't want to reset the dataset if its just going from static to static
-        this.initializeDistributions.bind(this)(props.staticDataset, !oldProps.testing);
+        this.initializeDistributions.bind(this)(props.staticDataset, !oldProps.testing, true);
         this.eraseAllPoints.bind(this)()        
       }
       this.setState({lastSpeed:'PAUSE'});
@@ -351,7 +354,7 @@ class PacScatter extends D3Component {
   }
 
   eraseAllPoints() {
-    this.svg.selectAll('path')
+    this.svg.selectAll('.dot')
       .attr("r", 3.5)
       .transition()
       .duration(500)
@@ -388,34 +391,36 @@ class PacScatter extends D3Component {
         // console.log("and after, this is ", this)
       }
       const datum = this.state.dataQueue.pop();
-      this.setState((state, props) => { return { drawnPoints: state.drawnPoints.concat([datum]) } },
-        () => { 
-          this.props.incrementSamples();
-          if (this.props.testing) {
-            this.props.updateTestError(this.calculateTestError())
-          } else {
-            this.props.updateSampleError(this.calculateSampleError())
+      if (datum) {
+        this.setState((state, props) => { return { drawnPoints: state.drawnPoints.concat([datum]) } },
+          () => { 
+            this.props.incrementSamples();
+            if (this.props.testing) {
+              this.props.updateTestError(this.calculateTestError())
+            } else {
+              this.props.updateSampleError(this.calculateSampleError())
+            }
           }
-        }
-      );
-      console.log("d3 is ", d3);
-      console.log("d3.symbolCross is ", d3.symbolCross)
-      console.log("d3.symbols is ", d3.symbols)
-      this.svg.append("path")
-        // .attr("class", "dot")
-        .attr("d", this.shapeValue(datum))
-        .attr(
-          "transform",
-          `translate(${this.xMap(datum)}, ${this.yMap(datum)})`
-        )
-        .style("fill", this.cValue(datum)) 
-        // .attr("r", 0.5)
-        // .transition()
-        // .duration(1000)
-        // .attr("r", 5.5)
-        // .transition()
-        // .duration(1000)
-        // .attr("r", 3.5);
+        );
+        // console.log("d3 is ", d3);
+        // console.log("d3.symbolCross is ", d3.symbolCross)
+        // console.log("d3.symbols is ", d3.symbols)
+        this.svg.append("path")
+          .attr("class", "dot")
+          .attr("d", this.shapeValue(datum))
+          .attr(
+            "transform",
+            `translate(${this.xMap(datum)}, ${this.yMap(datum)})`
+          )
+          .style("fill", this.cValue(datum)) 
+          // .attr("r", 0.5)
+          // .transition()
+          // .duration(1000)
+          // .attr("r", 5.5)
+          // .transition()
+          // .duration(1000)
+          // .attr("r", 3.5);        
+      }
     }
   }
 
@@ -433,8 +438,9 @@ class PacScatter extends D3Component {
       .enter().append("path")
       .attr("d", (d) => { return this.shapeValue(d) })
       .attr(
-        "transform",
-        `translate(${this.xMap(datum)}, ${this.yMap(datum)})`
+        "transform", (d) => {
+          return `translate(${this.xMap(d)}, ${this.yMap(d)})`
+        }
       )
       // .attr("class", "dot")
       // .attr("r", 3.5)
@@ -457,19 +463,21 @@ class PacScatter extends D3Component {
     if (totalSamples > 0 && boundingBox) {
       for (let i = 0; i < totalSamples; i++) {
         let datum = this.state.drawnPoints[i];
-        let predictedLabel = this.ptInRect(datum.x, datum.y, boundingBox);
-        if (predictedLabel == datum.label) {
-          if (predictedLabel) {
-            tp++;
+        if (datum) {
+          let predictedLabel = this.ptInRect(datum.x, datum.y, boundingBox);
+          if (predictedLabel == datum.label) {
+            if (predictedLabel) {
+              tp++;
+            } else {
+              tn++;
+            }
           } else {
-            tn++;
-          }
-        } else {
-          if (predictedLabel) {
-            fp++;
-          } else {
-            fn++;
-          }
+            if (predictedLabel) {
+              fp++;
+            } else {
+              fn++;
+            }
+          }          
         }
       }
       // We divide all the tp, etc. by the number of samples so we get rates, so it is comparable with true samples
