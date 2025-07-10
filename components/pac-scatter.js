@@ -21,6 +21,15 @@ class PacScatter extends D3Component {
     }
   }
 
+  shapeValue(d) {
+    console.log("d3.symbol().type(d3.symbolCircle) is ", d3.symbol().type(d3.symbolCircle));
+    if (d.label) {
+      return d3.symbol().type(d3.symbolCircle);
+    } else {
+      return d3.symbol().type(d3.symbolCross);
+    }
+  }
+
   initializeData() {
     this.xValue = (d) => { return d.x;}; // data -> value
     this.xScale = d3.scaleLinear().range([0, this.width]); // value -> display
@@ -33,7 +42,7 @@ class PacScatter extends D3Component {
 
     // setup fill color
     this.cValue = (d) => { return d.label ? 'green' : 'red';};
-    this.shapeValue = (d) => { return d.label ? d3.symbol().type(d3.symbolCircle) : d3.symbol().type(d3.symbolCross) };
+    // this.shapeValue = (d) => { return d.label ? d3.symbol().type(d3.symbolCircle) : d3.symbol().type(d3.symbolCross) };
 
     // Generating the random data
     // First, generate the bounds.
@@ -391,6 +400,7 @@ class PacScatter extends D3Component {
         // console.log("and after, this is ", this)
       }
       const datum = this.state.dataQueue.pop();
+      // console.log("datum is ", datum);
       if (datum) {
         this.setState((state, props) => { return { drawnPoints: state.drawnPoints.concat([datum]) } },
           () => { 
@@ -405,6 +415,7 @@ class PacScatter extends D3Component {
         // console.log("d3 is ", d3);
         // console.log("d3.symbolCross is ", d3.symbolCross)
         // console.log("d3.symbols is ", d3.symbols)
+        console.log("datum is ", datum)
         this.svg.append("path")
           .attr("class", "dot")
           .attr("d", this.shapeValue(datum))
@@ -432,21 +443,24 @@ class PacScatter extends D3Component {
     //   console.log("drawing the next point!")
     //   this.drawNextPoint();
     // }
+    console.log("in drawAllPoints, data is ", this.state.data);
+    console.log("first shapeValue is ", this.shapeValue(this.state.data[0]));
     this.setState({drawnPoints: this.state.data})
     this.svg.selectAll(".dot")
       .data(this.state.data)
       .enter().append("path")
-      .attr("d", (d) => { return this.shapeValue(d) })
-      .attr(
-        "transform", (d) => {
-          return `translate(${this.xMap(d)}, ${this.yMap(d)})`
-        }
-      )
-      // .attr("class", "dot")
-      // .attr("r", 3.5)
-      // .attr("cx", this.xMap)
-      // .attr("cy", this.yMap)
-      .style("fill", (d) => { return this.cValue(d);}) 
+        .attr("class", "dot")
+        .attr("d", (d) => { return this.shapeValue(d)() })
+        .attr(
+          "transform", (d) => {
+            return `translate(${this.xMap(d)}, ${this.yMap(d)})`
+          }
+        )
+        // .attr("class", "dot")
+        // .attr("r", 3.5)
+        // .attr("cx", this.xMap)
+        // .attr("cy", this.yMap)
+        .style("fill", (d) => { return this.cValue(d);}) 
   }
 
   calculateSampleError() {
