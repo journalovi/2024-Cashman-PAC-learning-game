@@ -186,9 +186,6 @@ class PacScatter extends D3Component {
     this.svg.selectAll(".candidate-distribution").remove();
 
     setTimeout(function() {
-      // Ugh.  I have async leaking all over this code.  Sometimes it tries
-      // to render the box before the data is ready, and it just doesn't draw it.
-      // Maybe setTimeout will make it wait.
       let boundingBox = null;
       let targetBoundingBox = null;
       if (this.props.toggledClosestBounds) {
@@ -275,13 +272,6 @@ class PacScatter extends D3Component {
       }
     }.bind(this), 200);
 
-
-    // if (this.props.showAllStrips) {
-    //   this.drawCandidateDistribution(this.props.showAllStrips, topStripBoundingBox, true, true)
-    //   this.drawCandidateDistribution(this.props.showAllStrips, topStripBoundingBox, true, true)
-    //   this.drawCandidateDistribution(this.props.showAllStrips, topStripBoundingBox, true, true)
-    // }
-
     if (!oldProps.testing && props.testing) {
       // We've switched from training to testing
       this.setState((state, props) => { return { dataQueue: this.generatedTestData.slice()}},
@@ -303,14 +293,6 @@ class PacScatter extends D3Component {
       this.animatePoints(props.speed);
     }
   }
-
-  // componentDidUpdate(props, state) {
-  //   // Check to see if moved from pause to other thing
-  //   if ((state.lastSpeed === 'PAUSE' || state.timerStarted == false) && props.speed !== 'PAUSE') {
-  //     this.state.lastSpeed = props.speed;
-  //     this.animatePoints();
-  //   }
-  // }
 
   brushed() {
     if (d3.event.type === 'end' && d3.event.selection) {
@@ -422,12 +404,6 @@ class PacScatter extends D3Component {
   }
 
   drawAllPoints() {
-    // const totalDataLength = this.state.data.length;
-    // const totalDrawnLength = this.state.drawnPoints.length;
-    // const numPoints = totalDataLength - totalDrawnLength;
-    // for (let i = 0; i < numPoints; i++) {
-    //   this.drawNextPoint();
-    // }
     this.setState({drawnPoints: this.state.data})
     this.svg.selectAll(".dot")
       .data(this.state.data)
@@ -439,10 +415,6 @@ class PacScatter extends D3Component {
             return `translate(${this.xMap(d)}, ${this.yMap(d)})`
           }
         )
-        // .attr("class", "dot")
-        // .attr("r", 3.5)
-        // .attr("cx", this.xMap)
-        // .attr("cy", this.yMap)
         .style("fill", (d) => { return this.cValue(d);}) 
   }
 
