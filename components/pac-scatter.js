@@ -22,7 +22,6 @@ class PacScatter extends D3Component {
   }
 
   shapeValue(d) {
-    console.log("d3.symbol().type(d3.symbolCircle) is ", d3.symbol().type(d3.symbolCircle));
     if (d.label) {
       return d3.symbol().type(d3.symbolCircle);
     } else {
@@ -51,7 +50,6 @@ class PacScatter extends D3Component {
   }
 
   initializeDistributions(isStatic=false, skipAnimation=false, skipAxes=false) {
-    console.log("WE ARE IN initializeDistributions!");
     if (this.props.targetTrainDistribution) {
       this.targetTrainDistribution = this.props.targetTrainDistribution;
     } else {
@@ -79,12 +77,9 @@ class PacScatter extends D3Component {
         this.generatedTrainData = this.generateUniformRectData(this.targetTrainDistribution, this.outerBounds, this.props.total_samples)  
       }
 
-      // console.log("this.props.targetTestDistributionType is ", this.props.targetTestDistributionType)
       if (this.props.targetTestDistributionType === 'ellipse') {
-        // console.log("generatedTestData is being labeled as an ellipse")
         this.generatedTestData = this.generateUniformEllipseData(this.targetTestDistribution, this.outerBounds, this.props.total_samples)
       } else {
-        // console.log("generatedTestData is being labeled as a rectangle")
         this.generatedTestData = this.generateUniformRectData(this.targetTestDistribution, this.outerBounds, this.props.total_samples)  
       }
     }
@@ -197,7 +192,6 @@ class PacScatter extends D3Component {
       let boundingBox = null;
       let targetBoundingBox = null;
       if (this.props.toggledClosestBounds) {
-        // console.log("before calculating the bounding box, the drawn points are ", this.state.drawnPoints)
         boundingBox = this.getClosestBounds.bind(this)();
         // we only need this for the proof so I'll hard code it here
         targetBoundingBox = { x: {}, y: {}};
@@ -206,8 +200,6 @@ class PacScatter extends D3Component {
         targetBoundingBox['y']['min'] = boundingBox['y']['min'] - 0.1;
         targetBoundingBox['y']['max'] = boundingBox['y']['max'] + 0.1;
         this.setState({candidateDistribution: boundingBox})
-        // console.log("IN HERE, boundingBox is ", boundingBox)
-        // console.log("IN HERE, targetBoundingBox is ", targetBoundingBox)
       }
       if (this.props.toggledFurthestBounds) {
         boundingBox = this.getFurthestBounds.bind(this)();
@@ -395,12 +387,9 @@ class PacScatter extends D3Component {
         newBounds['x']['max'] = this.targetTestDistribution['x']['max'] + xStep
         newBounds['y']['min'] = this.targetTestDistribution['y']['min'] + yStep
         newBounds['y']['max'] = this.targetTestDistribution['y']['max'] + yStep
-        // console.log("xstep is ", xStep, " and yStep is ", yStep, "and newBounds is ", newBounds, " and this is ", this)
         this.targetTestDistribution = newBounds;
-        // console.log("and after, this is ", this)
       }
       const datum = this.state.dataQueue.pop();
-      // console.log("datum is ", datum);
       if (datum) {
         this.setState((state, props) => { return { drawnPoints: state.drawnPoints.concat([datum]) } },
           () => { 
@@ -412,10 +401,6 @@ class PacScatter extends D3Component {
             }
           }
         );
-        // console.log("d3 is ", d3);
-        // console.log("d3.symbolCross is ", d3.symbolCross)
-        // console.log("d3.symbols is ", d3.symbols)
-        console.log("datum is ", datum)
         this.svg.append("path")
           .attr("class", "dot")
           .attr("d", this.shapeValue(datum))
@@ -440,11 +425,8 @@ class PacScatter extends D3Component {
     // const totalDrawnLength = this.state.drawnPoints.length;
     // const numPoints = totalDataLength - totalDrawnLength;
     // for (let i = 0; i < numPoints; i++) {
-    //   console.log("drawing the next point!")
     //   this.drawNextPoint();
     // }
-    console.log("in drawAllPoints, data is ", this.state.data);
-    console.log("first shapeValue is ", this.shapeValue(this.state.data[0]));
     this.setState({drawnPoints: this.state.data})
     this.svg.selectAll(".dot")
       .data(this.state.data)

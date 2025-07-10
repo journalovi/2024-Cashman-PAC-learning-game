@@ -12,11 +12,11 @@
    /]
   // author:"Dylan Cashman"
   // authorurl:"https://www.eecs.tufts.edu/~dcashm01/"
-
 [var name:"currgamestate" value:"NA" /]
 [var name:"currgamemsg" value:"Welcome to the Four Germans Game!" /]
 
 [Fixed]
+[MobileWarningToast /]
 [PacGameContainer 
   parentcurrgamemsg: currgamemsg
   gamestate: currgamestate
