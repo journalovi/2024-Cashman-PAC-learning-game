@@ -30,7 +30,7 @@ class GameChanger extends React.Component {
   }
 
   render() {
-    const { hasError, idyll, updateProps, ...props } = this.props;
+    const { hasError, idyll, updateProps, showhelp, ...props } = this.props;
 
     return (
       <div className="game-changer" {...props}>
@@ -41,7 +41,7 @@ class GameChanger extends React.Component {
           />
           {props.shorttext}
         </Fab>
-        {props.showhelp && <InfoTooltip tooltiptext="As you scroll through this page, each time you see a button like this one, the game will change to match where you are in the text.  After that, to go back to any previous state, either click on the buttons, or refresh the page." />}
+        {showhelp && <InfoTooltip tooltiptext="As you scroll through this page, each time you see a button like this one, the game will change to match where you are in the text.  After that, to go back to any previous state, either click on the buttons, or refresh the page." />}
       </div>
     );
   }
