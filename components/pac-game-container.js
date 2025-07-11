@@ -517,8 +517,14 @@ class PacGameContainer extends React.Component {
   render() {
     const { hasError, idyll, updateProps, ...props } = this.props;
 
+
     return (
-      <div className='pac-game-container' {...props}>
+      <div style={{
+          opacity: this.props.gamestate === 'pause_definitions' ? 0 : 1, // 0 for invisible, 1 for visible
+          pointerEvents: this.props.gamestate === 'pause_definitions' ? 'none' : 'auto', // Disables interaction when invisible
+          transition: 'opacity 0.3s ease-in-out' // Smooth transition for opacity changes
+        }}
+        className='pac-game-container'  {...props}>
         <Paper >
           <Paper elevation={3} >
             <div className='pac-game-message'>{this.props.parentcurrgamemsg}</div>
