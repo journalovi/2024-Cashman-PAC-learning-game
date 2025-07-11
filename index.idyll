@@ -6,17 +6,17 @@
   subtitle:"Or: Why We Should (and Shouldn't) Trust Machine Learning"
   author: "Dylan Cashman, Assistant Professor of Computer Science, Brandeis University"
   authorurl:"https://cs.brandeis.edu/~dylan"
-  date:"November 30, 2024"
+  date:"July 9, 2025"
   background:"#222222"
   color:"#ffffff"
    /]
   // author:"Dylan Cashman"
   // authorurl:"https://www.eecs.tufts.edu/~dcashm01/"
-
 [var name:"currgamestate" value:"NA" /]
 [var name:"currgamemsg" value:"Welcome to the Four Germans Game!" /]
 
 [Fixed]
+[MobileWarningToast /]
 [PacGameContainer 
   parentcurrgamemsg: currgamemsg
   gamestate: currgamestate
@@ -41,7 +41,9 @@ This paper is under review on the experimental track of the [Journal of Visualiz
 
 ## Abstract
 
-In this interactive article, we present an interactive game that represents the types of tasks solved by machine learning algorithms.  We use this game to motivate the definition of Probably Approximately Correct (PAC) learning, illustrating a proof of PAC learnability for Empirical Risk Minimization (ERM).  Then, we show three types of vulnerabilities of ERM that often occur in applied machine learning - domain mismatch, dependencies in data, and an incorrect model class.  We conclude by arguing for the need for visualization to identify these issues in a modeling dataset.
+In this interactive article, we present an interactive game that represents the types of tasks solved by machine learning algorithms.  We use this game to motivate the definition of Probably Approximately Correct (PAC) learning, illustrating a proof of PAC learnability for Empirical Risk Minimization (ERM).  Then, we show three types of vulnerabilities of ERM that often occur in applied machine learning - domain mismatch, dependencies in data, and an incorrect model class.  We conclude by arguing for the need for visualization to identify these issues in a modeling dataset.  
+
+Source code and any associated materials can be found on [link text: "OSF" url: "https://osf.io/65gre/" /].
 
 ## Introduction
 [var name:"beginning" value:0 /]
@@ -55,12 +57,12 @@ In this interactive article, we present an interactive game that represents the 
   onEnterView: `beginning++` scrolloffset:300
   showhelp: true
 /]
-Like programming your microwave clock or cutting open a pineapple, learning about Machine Learning is one of those things that seems intimidating, but ultimately is pretty logical.  I'm going to illustrate to you a few basic principles of Machine Learning using a simple interactive game, which you will play using the interface on the right side of your screen.  
+Like programming your microwave clock or cutting open a pineapple, learning about machine learning is one of those things that seems intimidating, but ultimately is pretty logical.  I'm going to illustrate to you a few basic principles of machine learning using a simple interactive game, which you will play using the interface on the right side of your screen.  
 
 In this game, you are trying to guess a rectangular region, called a **concept**, that represents some subset of the universe.  
 The cartesian plane, what we think of as a pair of perpendicular x and y axes, represents the space of all possible x and y values, and the concept you are trying to figure out is a subset of this x and y space.  One way to think of the game is that if the x represented weight, and the y axis represented height, I might ask you to guess what rectangular region represents the concept of "men of medium height and weight".  
 
-I don't give you any labels on your x and y axes; instead, I give you a set of examples that are in the concept (which we will refer to as having a **true** label), and a set of examples that are outside of the concept (which we will refer to as having a **false** label).  You use the labeled data that I provide for you to guess what is the definition of the concept that data represents.  This simple taskis actually very similar to the task of a machine learning algorithm does to build a model, whether it be a facial recognition model, a weather prediction model, or even a large language model.  When provided with some data to learn from (typically called a **training set**), the machine learning algorithm applies a strategy to guess a concept.  Then, the model representing that concept can be tested out on some held-out or real-world data, and hopefully, it performs pretty well.
+I don't give you any labels on your x and y axes; instead, I give you a set of examples that are in the concept (which we will refer to as having a **true** label), and a set of examples that are outside of the concept (which we will refer to as having a **false** label).  You use the labeled data that I provide for you to guess what is the definition of the concept that data represents.  This simple task is actually very similar to the task a machine learning algorithm does to build a model, whether it be a facial recognition model, a weather prediction model, or even a large language model.  When provided with some data to learn from (typically called a **training set**), the machine learning algorithm applies a strategy to guess a concept.  Then, the model representing that concept can be tested out on some held-out or real-world data, and hopefully, it performs pretty well.
 
 Before proceeding to the next section, I want you pretend to be a machine learning algorithm, using the interface to your right.  On the x and y plane, you can click and drag a rectangular region to represent your guess at the concept.  By hitting the TEST! button, additional held-out data will be evaluated against your concept.  Your guessed concept will be evaluated based on what percent of randomly drawn points would be True Positives (TP) and True Negatives (TN) - i.e. new points that are correctly classified by your guessed concept - vs. False Positives (FP) and False Negatives (FN) - i.e. new points that are incorrectly classified by your guessed concept.  For more details on these metrics, mouse over them in the interactive display on the right side of the page.
 
@@ -69,7 +71,7 @@ Once you've tested out your concept, play again by using the [InlineRefresh /] b
 [SectionDivider /]
 
 
-I first heard of this game from Tufts University professor emeritus Anselm Blumer, who along with his coauthors Ehrenfeucht, Haussler, and Warmuth used this setting to demonstrate the concept of learnability [link text: "in their article in 1989" url: "https://dl.acm.org/citation.cfm?id=76371" /].  That paper became known as the "Four Germans Paper", and in honor of their work, I call this game the *Four Germans Game*.  This game is a useful abstraction that can help illustrate the task that machine learning algorithms have to solve.  Machine learning models see some training data generated by an underlying phenomenon (i.e. the hidden box), and based on that limited information must fit a model that approximates the underlying phenomenon.  A successful algorithm will pick a concept with low error on its training data, and will hopefully have similarly low error when it is tested (here error defined as the total area that is only inside one box, i.e. false positives or false negatives).  A lot can go wrong, however, even in this simple game:  
+I first heard of this game from Tufts University professor emeritus Anselm Blumer, who along with his coauthors Ehrenfeucht, Haussler, and Warmuth used this setting to demonstrate the concept of learnability [link text: "in their article in 1989" url: "https://dl.acm.org/citation.cfm?id=76371" /].  That paper became known as the "Four Germans Paper", and in honor of their work, I call this game the *Four Germans Game*.  This game is a useful abstraction that can help illustrate the task that machine learning algorithms have to solve.  Machine learning models see some training data generated by an underlying phenomenon (i.e. the hidden box), and based on that limited information must fit a model that approximates the underlying phenomenon.  A successful algorithm will pick a concept with low error on its training data, and will hopefully have similarly low error when it is tested (here error is defined as the total area that is only inside one box, i.e. false positives or false negatives).  A lot can go wrong, however, even in this simple game:  
 
 - What if the training data is not representative of the actual phenomenon?
 - What if there is not enough training data?
@@ -80,9 +82,9 @@ This game can be used to illustrate many concepts of one of the underlying theor
 
 ### Why this is important
 
-Machine Learning algorithms are becoming ubiquitous tools in the age of big data to aid in decision making and data analysis.  They can be deployed in complex situations where the data they are acting on has different qualities than the data they were training on.  A common example is e-mail spam filters: the text of many spam emails was used to train spam filters.  However, since the strategies used by e-mail spammers evolve over time, the training dataset might not be representative of newer spam emails, so those emails get through.  Understanding the ways in which machine learning algorithms can have worse performance than we expect is important to designing more resilient algorithms.
+Machine learning algorithms are becoming ubiquitous tools in the age of big data to aid in decision making and data analysis.  They can be deployed in complex situations where the data they are acting on has different qualities than the data they were training on.  A common example is e-mail spam filters: the text of many spam emails was used to train spam filters.  However, since the strategies used by e-mail spammers evolve over time, the training dataset might not be representative of newer spam emails, so those emails get through.  This is a manifestation of the *domain mismatch* vulnerability illustrated in this article.  Understanding the ways in which machine learning algorithms can have worse performance than we expect is important to designing more resilient algorithms.
 
-This is increasingly important as Machine Learning models are responsible for broader use cases.  They are actively being deployed in scenarios where their impact directly effects humans,including 
+This is increasingly important as machine learning models are responsible for broader use cases.  They are actively being deployed in scenarios where their impact directly effects humans, including 
 [link text:"self-driving cars" url:"https://arxiv.org/abs/1901.04407" /], 
 [link text: "patient triaging software at hospitals" url:"https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0205836" /], and even [link text: "crime prediction software" url: "https://link.springer.com/chapter/10.1007/978-3-030-14680-1_40" /], a la [link text: "Minority Report" url: "https://www.imdb.com/title/tt0181689/" /].  Automation from deep learning models such as [link text: "facial recognition technology" url: "https://www.gao.gov/products/gao-22-106100" /], [link text: "image and scene classification" url: "https://www.sciencedirect.com/science/article/pii/S0386111219301566" /], and [link text: "text generation through large language models" url: "https://openai.com/blog/chatgpt" /] are rapidly eclipsing levels of human competency and changing the way we live our lives.
 
@@ -115,7 +117,8 @@ Let's return to the game, and consider some machine learning concepts.  First, t
 
 Not very fun, or interesting, right?
 
-This is an illustration of there being [link text:"No Free Lunch theorems for optimization" url:"https://ieeexplore.ieee.org/document/585893" /].  In the absence of any information, we can do no better than random chance, and thus we can make no statements about how "correct" we are.  You might have 10% error, you might have 90% error, you might fit the rectangle perfectly and have 0 error.  
+This is an illustration of there being [link text:"No Free Lunch theorems for optimization" url:"https://ieeexplore.ieee.org/document/585893" /].  As [link text:"described by David Wolpert" url:"https://arxiv.org/pdf/2007.10928" /], a researcher in machine learning theory and author of several No Free Lunch (NFL) papers, *"the NFL theorems say that under a uniform distribution over problems (be they supervised learning problems or search problems), all algorithms perform equally."*
+In the absence of any information, we can do no better than random chance, and thus we can make no statements about how "correct" we are.  You might have 10% error, you might have 90% error, you might fit the rectangle perfectly and have 0 error.  
 
 [SectionDivider /]
 
@@ -237,7 +240,7 @@ This only makes sense, though, if there is some theoretical basis for why seeing
 
 Understanding how to prove PAC learnability can help us see what stipulations about a machine learning use case need to hold in order to trust empirical risk minimization.  The definition of PAC learnability can also provide hints into how applied machine learning can go wrong.  
 
-Now, we will use our game to demonstrate first how a learning algorithm can be proven to be a PAC learning algorithm.  Then, we will break down different ways where PAC learning can break down due to issues with the data or the complexity of the concept that we are trying to model.
+Now, we will use our game to demonstrate first how a learning algorithm can be proven to be a PAC learning algorithm.  Then, we will highlight different ways where PAC learning can break down due to issues with the data or the complexity of the concept that we are trying to model.
 [/div]
 
 [/FullWidth]
@@ -269,7 +272,9 @@ We can use the PAC learning paradigm to analyze our algorithms.  In particular, 
   onEnterView: `pac_learning_2++` scrolloffset:300
 /]
 
-First, we note that the tightest-fit rectangle is always contained in the target rectangle.  We can express the total error region as four strips: the strips above, below, to the left, and to the right of the tightest-fit rectangle.  This is the only region where our algorithm will label incorrectly.  To proceed, we would like it if the size of each region is bounded above [Equation]\leq \frac{\epsilon}{4}[/Equation], so that the total size of the error regions is less than [Equation]\epsilon[/Equation].  If the data is uniformly distributed, we can try to count how many random samples we would generally need to receive labels for before we would be pretty sure that we would receive points in these error regions.  This will give us a relationship between [Equation]\epsilon[/Equation] and [Equation]\delta[/Equation] in terms of the number of samples drawn, [Equation]M[/Equation].
+First, we note that the tightest-fit rectangle is always contained in the target rectangle.  We can express the total error region as four strips: the strips above, below, to the left, and to the right of the tightest-fit rectangle.  This is the only region where the model chosen by our algorithm will label incorrectly.  To proceed, we would like it if the size of each region is [Equation]\leq \frac{\epsilon}{4}[/Equation], so that the total size of the error regions is less than [Equation]\epsilon[/Equation].  
+
+We want to calculate the probability that our model makes mistakes.  Since this only happens in the error region, if the data is uniformly distributed, we can count how many random samples we would generally need to receive labels for before we would be pretty sure that we would receive points in these error regions.  This will give us a relationship between [Equation]\epsilon[/Equation] and [Equation]\delta[/Equation] in terms of the number of samples drawn, [Equation]M[/Equation].
 
 [SectionDivider /]
 
@@ -299,9 +304,11 @@ Consider the top strip, which we'll call T'.  Then, consider the strip T that st
   onEnterView: `pac_learning_4++` scrolloffset:300
 /]
 
-The same analysis holds for the other three regions, so by the union bound, the error is at most [Equation]4(1 - \frac{\epsilon}{4})^M[/Equation].  Then, we choose M to satisfy [Equation]4(1 - \frac{\epsilon}{4})^M \leq \delta[/Equation], i.e. the probability that the area is **not** bounded by [Equation]\epsilon[/Equation] is smaller than [Equation]\delta[/Equation], so the probability that it **is** bounded by [Equation]\epsilon[/Equation] is greater than [Equation]1 - \delta[/Equation].  
+The same analysis holds for the other three regions - the probability that *any one* of the four regions (above, below, to the left, to the right) have area [Equation]>\frac{\epsilon}{4}[/Equation] is exactly [Equation](1 - \frac{\epsilon}{4})^M[/Equation].  And, if *all* of them have area [Equation]\leq\frac{\epsilon}{4}[/Equation], then we have bounded our total error region to be [Equation]\leq\epsilon[/Equation].  We need to calculate the probability that this is not true - that any of these regions is too large.  By [link text: "Boole's Inequality" url: "https://en.wikipedia.org/wiki/Boole%27s_inequality" /], the probability that at least one of the four strips have area [Equation]>\frac{\epsilon}{4}[/Equation] is [Equation]\leq 4(1 - \frac{\epsilon}{4})^M[/Equation].  
 
-The final step of the proof is to determine how many samples we'd need - solving for M.  Using the inequality [Equation](1 - x) \leq e^{-x}[/Equation], we can simplify the bound to [Equation]4e^{\epsilon M / 4} \leq \delta[/Equation], and solve for [Equation]M \geq (4/\epsilon)ln(4/\delta)[/Equation].  This is a very common strategy for establishing bounds in these types of proofs.  The key takeaway is that M is not infinity.  Since M is a real, finite number, we've demonstrated that **the problem is PAC-learnable**, i.e. we have bounded the error in terms of the number of samples seen.
+While this may all seem meandering, we are actually almost there.  What we've shown is that the probability that our model has sufficiently small error ([Equation]\leq\epsilon[/Equation]) is dependent on [Equation]M[/Equation], the number of samples we've seen.  In this game, we get to wait, and let [Equation]M[/Equation] increase - we get to wait to see more labeled points before we choose our tightest fit rectangle.  To get our *probably approximately correct* model, we choose [Equation]M[/Equation] to satisfy [Equation]4(1 - \frac{\epsilon}{4})^M \leq \delta[/Equation], i.e. the probability that the area is **not** bounded by [Equation]\epsilon[/Equation] is smaller than [Equation]\delta[/Equation], so the probability that it **is** bounded by [Equation]\epsilon[/Equation] is greater than [Equation]1 - \delta[/Equation].  
+
+The final step of the proof is to determine how many samples we'd need - solving for [Equation]M[/Equation].  Using the inequality [Equation](1 - x) \leq e^{-x}[/Equation], we can simplify the bound to [Equation]4e^{\epsilon M / 4} \leq \delta[/Equation], and solve for [Equation]M \geq (4/\epsilon)ln(4/\delta)[/Equation].  Switching out bounds for more mathematically convenient ones is a very common strategy for establishing bounds in these types of proofs.  The key takeaway is that [Equation]M[/Equation] is not infinity.  Since [Equation]M[/Equation] is a real, finite number, we've demonstrated that **the problem is PAC-learnable**, i.e. we have bounded the error in terms of the number of samples seen.
 
 [SectionDivider /]
 
@@ -332,19 +339,19 @@ In this version of the game, the i.i.d. assumption is violated by placing some l
 
 [SectionDivider /]
 
-### Training-Testing Mismatch
+### Domain Mismatch
 
 [var name:"train_test_mismatch" value:0 /]
 [GameChanger 
   longtext: "Here, the training data comes from a different distribution than the testing."
-  shorttext: "Train Test Mismatch"
+  shorttext: "Domain Mismatch"
   gamestate: "train_test_mismatch"
   progressvar: train_test_mismatch
   parentcurrgamestate: currgamestate
   parentcurrgamemsg: currgamemsg
   onEnterView: `train_test_mismatch++` scrolloffset:300
 /]
-We assume (or at least count on) that the data that we test our algorithm on is from the same distribution that we train our algorithm on.  This assumption is frequently incorrect in practice, and can result in unexpected behavior by the machine learning algorithm.  Consider a computer vision algorithm for a self-driving car that only trained in the Pacific Northwestern United States, and then was deployed in a desert climate; the behavior of the computer vision algorithm in training might have no relationship with its behavior in testing.  This would correspond to the testing samples being labeled in a different region than during training.
+We assume (or at least count on) that the data that we test our algorithm on is from the same distribution that we train our algorithm on.  This assumption is frequently incorrect in practice, and can result in unexpected behavior by the machine learning algorithm.  This phenomenon is called *domain mismatch*, or sometimes *train test mismatch*, because the domain of the data that the model is trained on is not the same domain of data that the model will be deployed or evaluated on.  Consider a computer vision algorithm for a self-driving car that only trained in the Pacific Northwestern United States, and then was deployed in a desert climate; the behavior of the computer vision algorithm in training might have no relationship with its behavior in testing.  This would correspond to the testing samples being labeled in a different region than during training.
 
 In this version of the game, the training distribution and the testing distribution are independent of one another.  This means that the true labels (green points) that you get in training may not be representative of where the true labels would appear in the testing phase.  It makes it impossible to guarantee any performance: it's back to the No Free Lunch situation described earlier.
 
@@ -363,7 +370,7 @@ In this version of the game, the training distribution and the testing distribut
   onEnterView: `incorrect_model_class++` scrolloffset:300
 /]
 
-Our proof assumed that we already knew that the type of region we were looking for was a rectangle.  But in practice, we rarely know what kind of machine learning model will match the phenomenon being modeled in the data.  Suppose, instead of a rectangular region, the region we were looking for turned out to be an ellipse, or a parallellogram, or even an arbitrary, amorphous disconnected region.  A geometric proof would then be much harder, or even impossible.  The field of adversarial machine learning gives us practical examples.  For example, small amounts of noise added in to images that change the label of images take advantage of the high-dimensional decision boundaries found in convolutional neural nets, as in [link text: "Tabacof and Valle (2016)" url: "https://ieeexplore.ieee.org/abstract/document/7727230" /]
+Our proof assumed that we already knew that the type of region we were looking for was a rectangle.  But in practice, we rarely know what kind of machine learning model will match the phenomenon being modeled in the data.  Suppose, instead of a rectangular region, the region we were looking for turned out to be an ellipse, or a parallellogram, or even an arbitrary, amorphous disconnected region.  A geometric proof would then be much harder, or even impossible.  The field of adversarial machine learning gives us practical examples.  For example, small amounts of noise added in to images that change the label of images take advantage of the high-dimensional decision boundaries found in convolutional neural nets, as in [link text: "Tabacof and Valle (2016)." url: "https://ieeexplore.ieee.org/abstract/document/7727230" /]
 
 In this version of the game, the actual region we are trying to guess is an ellipse, but we can only choose a rectangle.  Play it a few times and notice that no matter how good your guess is, you will always have some nonzero lower bound on your testing error.
 
@@ -408,6 +415,7 @@ Thank you to Anselm Blumer and the reviewers from VisXAI.
 - Fujiyoshi, Hironobu, Tsubasa Hirakawa, and Takayoshi Yamashita. "Deep learning-based image recognition for autonomous driving." IATSS research 43.4 (2019): 244-252.
 - Buolamwini, Joy, and Timnit Gebru. "Gender shades: Intersectional accuracy disparities in commercial gender classification." Conference on fairness, accountability and transparency. PMLR, 2018.
 - Wolpert, David H., and William G. Macready. "No free lunch theorems for optimization." IEEE transactions on evolutionary computation 1.1 (1997): 67-82.
+- Wolpert, David H. "What is important about the no free lunch theorems?." Black box optimization, machine learning, and no-free lunch theorems. Cham: Springer International Publishing, 2021. 373-388.
 - Tabacof, Pedro, and Eduardo Valle. "Exploring the space of adversarial images." 2016 international joint conference on neural networks (IJCNN). IEEE, 2016.
 
 
