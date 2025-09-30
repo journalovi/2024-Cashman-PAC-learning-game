@@ -527,7 +527,7 @@ class PacGameContainer extends React.Component {
         className='pac-game-container'  {...props}>
         <Paper >
           <Paper elevation={3} >
-            <div className='pac-game-message'>{this.props.parentcurrgamemsg}</div>
+            <div className='pac-game-message fade-pulse' key={this.props.parentcurrgamemsg}>{this.props.parentcurrgamemsg}</div>
           </Paper>
           <Grid container spacing={3}>
             {/* <Grid item container xs={2}>

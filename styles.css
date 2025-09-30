@@ -253,3 +253,18 @@
 .mobile-warning-toast-close:hover {
   opacity: 1;
 }
+
+.fade-pulse {
+  /*animation: pulse .4s ease-in-out infinite alternate;*/
+  animation: pulse .4s ease-in alternate;
+  /*animation: pulse 0.5s ease-in-out;*/
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.2;
+  }
+  100% {
+    opacity: 1;
+  }
+}
