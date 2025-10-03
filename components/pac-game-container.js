@@ -519,145 +519,147 @@ class PacGameContainer extends React.Component {
 
 
     return (
-      <div style={{
-          opacity: this.props.gamestate === 'pause_definitions' ? 0 : 1, // 0 for invisible, 1 for visible
-          pointerEvents: this.props.gamestate === 'pause_definitions' ? 'none' : 'auto', // Disables interaction when invisible
-          transition: 'opacity 0.3s ease-in-out' // Smooth transition for opacity changes
-        }}
-        className='pac-game-container'  {...props}>
-        <Paper >
-          <Paper elevation={3} >
-            <div className='pac-game-message'>{this.props.parentcurrgamemsg}</div>
-          </Paper>
-          <Grid container spacing={3}>
-            {/* <Grid item container xs={2}>
-              <Grid item xs={12} className='pac-game-step'>Play</Grid>
-              <Grid item xs={12} className='pac-game-step'>Sampling</Grid>
-              <Grid item xs={12} className='pac-game-step'>Automated Models</Grid>
-              <Grid item xs={12} className='pac-game-step'>PAC Learning</Grid>
-              <Grid item xs={12} className='pac-game-step'>Why does ML fail?</Grid>
-              <Grid item xs={12} className='pac-game-step'>How does Viz fix this?</Grid>
-            </Grid>
-            <Grid item xs={10}> */}
+      <div className="game-wrapper">
+        <div style={{
+            opacity: this.props.gamestate === 'pause_definitions' ? 0 : 1, // 0 for invisible, 1 for visible
+            pointerEvents: this.props.gamestate === 'pause_definitions' ? 'none' : 'auto', // Disables interaction when invisible
+            transition: 'opacity 0.3s ease-in-out' // Smooth transition for opacity changes
+          }}
+          className='pac-game-container'  {...props}>
+          <Paper >
+            <Paper elevation={3} >
+              <div className='pac-game-message fade-pulse' key={this.props.parentcurrgamemsg}>{this.props.parentcurrgamemsg}</div>
+            </Paper>
+            <Grid container spacing={3}>
+              {/* <Grid item container xs={2}>
+                <Grid item xs={12} className='pac-game-step'>Play</Grid>
+                <Grid item xs={12} className='pac-game-step'>Sampling</Grid>
+                <Grid item xs={12} className='pac-game-step'>Automated Models</Grid>
+                <Grid item xs={12} className='pac-game-step'>PAC Learning</Grid>
+                <Grid item xs={12} className='pac-game-step'>Why does ML fail?</Grid>
+                <Grid item xs={12} className='pac-game-step'>How does Viz fix this?</Grid>
+              </Grid>
+              <Grid item xs={10}> */}
 
-            <Grid item xs={1}/>
-            <Grid item xs={11}>
-              <Grid container spacing={4}>
+              <Grid item xs={1}/>
+              <Grid item xs={11}>
+                <Grid container spacing={4}>
+                  <Grid item xs={12}>
+                    <Button alt="Restart The Game" disabled={!this.state.story.resetButtonActive} onClick={this.refreshClicked.bind(this)}><Refresh/></Button>
+                    <Button alt="Pause The Game" disabled={!this.state.story.pauseButtonActive} className={this.state.speed === 'PAUSE' ? 'selectedButton' : null} onClick={this.pause.bind(this)}><Pause/></Button>
+                    <Button alt="Resume The Game" disabled={!this.state.story.playButtonActive} className={this.state.speed === 'NORMAL' ? 'selectedButton' : null} onClick={this.play.bind(this)}><PlayArrow/></Button>
+                    <Button alt="Speed Up The Game" disabled={!this.state.story.playButtonActive} className={this.state.speed === 'FASTER' ? 'selectedButton' : null} onClick={this.faster.bind(this)}><SkipNext/></Button>
+                    <Button alt="Test Out My Model" disabled={!this.state.story.testButtonActive} onClick={this.toggleTesting.bind(this)}>Test!</Button>
+                  </Grid>
+                </Grid>
                 <Grid item xs={12}>
-                  <Button alt="Restart The Game" disabled={!this.state.story.resetButtonActive} onClick={this.refreshClicked.bind(this)}><Refresh/></Button>
-                  <Button alt="Pause The Game" disabled={!this.state.story.pauseButtonActive} className={this.state.speed === 'PAUSE' ? 'selectedButton' : null} onClick={this.pause.bind(this)}><Pause/></Button>
-                  <Button alt="Resume The Game" disabled={!this.state.story.playButtonActive} className={this.state.speed === 'NORMAL' ? 'selectedButton' : null} onClick={this.play.bind(this)}><PlayArrow/></Button>
-                  <Button alt="Speed Up The Game" disabled={!this.state.story.playButtonActive} className={this.state.speed === 'FASTER' ? 'selectedButton' : null} onClick={this.faster.bind(this)}><SkipNext/></Button>
-                  <Button alt="Test Out My Model" disabled={!this.state.story.testButtonActive} onClick={this.toggleTesting.bind(this)}>Test!</Button>
+                  <PacScatter
+                    total_samples={this.state.total_samples}
+                    speed={this.state.speed}
+                    showGroundTruth={this.state.showGroundTruth}
+                    showCandidate={this.state.showCandidate}
+                    resetData={this.state.resetData}
+                    targetTrainDistributionType={this.state.story.targetTrainDistributionType}
+                    targetTestDistributionType={this.state.story.targetTestDistributionType}
+                    trainMatchTest={!this.state.story.trainTestMismatch}
+                    testing={this.state.testing}
+                    updateSampleError={this.updateSampleError.bind(this)}
+                    updateTestError={this.updateTestError.bind(this)}
+                    incrementSamples={this.incrementSamples.bind(this)}
+                    resetSamples={this.resetSamples.bind(this)}
+                    resetRefresh={this.resetRefresh.bind(this)}
+                    setRefresh={this.state.setRefresh}
+                    xAxisName={this.state.xAxisName}
+                    yAxisName={this.state.yAxisName}
+                    generatePoints={this.state.story.generatePoints}
+                    staticDataset={this.state.staticDataset}
+                    drawAllPoints={this.state.story.drawAllPoints}
+                    toggledClosestBounds={this.state.story.toggledClosestBounds}
+                    toggledFurthestBounds={this.state.story.toggledFurthestBounds}
+                    toggledMaxMarginBounds={this.state.story.toggledMaxMarginBounds}
+                    showTopStrip={this.state.story.showTopStrip}
+                    showAllStrips={this.state.story.showAllStrips}
+                    temporalDrift={this.state.story.temporalDrift}
+                  />
                 </Grid>
-              </Grid>
-              <Grid item xs={12}>
-                <PacScatter
-                  total_samples={this.state.total_samples}
-                  speed={this.state.speed}
-                  showGroundTruth={this.state.showGroundTruth}
-                  showCandidate={this.state.showCandidate}
-                  resetData={this.state.resetData}
-                  targetTrainDistributionType={this.state.story.targetTrainDistributionType}
-                  targetTestDistributionType={this.state.story.targetTestDistributionType}
-                  trainMatchTest={!this.state.story.trainTestMismatch}
-                  testing={this.state.testing}
-                  updateSampleError={this.updateSampleError.bind(this)}
-                  updateTestError={this.updateTestError.bind(this)}
-                  incrementSamples={this.incrementSamples.bind(this)}
-                  resetSamples={this.resetSamples.bind(this)}
-                  resetRefresh={this.resetRefresh.bind(this)}
-                  setRefresh={this.state.setRefresh}
-                  xAxisName={this.state.xAxisName}
-                  yAxisName={this.state.yAxisName}
-                  generatePoints={this.state.story.generatePoints}
-                  staticDataset={this.state.staticDataset}
-                  drawAllPoints={this.state.story.drawAllPoints}
-                  toggledClosestBounds={this.state.story.toggledClosestBounds}
-                  toggledFurthestBounds={this.state.story.toggledFurthestBounds}
-                  toggledMaxMarginBounds={this.state.story.toggledMaxMarginBounds}
-                  showTopStrip={this.state.story.showTopStrip}
-                  showAllStrips={this.state.story.showAllStrips}
-                  temporalDrift={this.state.story.temporalDrift}
-                />
-              </Grid>
-              <Grid container space={2}>
-                <Grid item xs={6}>
-                  <div className='evaluation-statistics evaluation-statistics-training'>
-                    <Grid container space={2}>
-                      <Grid item xs={12}>
-                        <div className='evaluation-accuracy'>
-                          <span className='accuracy-span'>Seen <b>{this.state.training_samples}</b> out of {this.state.total_samples} total training samples.</span>
-                        </div>
+                <Grid container space={2}>
+                  <Grid item xs={6}>
+                    <div className='evaluation-statistics evaluation-statistics-training'>
+                      <Grid container space={2}>
+                        <Grid item xs={12}>
+                          <div className='evaluation-accuracy'>
+                            <span className='accuracy-span'>Seen <b>{this.state.training_samples}</b> out of {this.state.total_samples} total training samples.</span>
+                          </div>
+                        </Grid>
+                        <Grid item xs={12}>
+                          <div className='evaluation-accuracy'>
+                            <span className='accuracy-span'>Total Training Error: {this.state.sampleStatistics.error.toFixed(2)}%</span>
+                          </div>
+                        </Grid>
+                        <Grid item xs={6}>
+                          <div className='evaluation-cm-item true-positive'>
+                            <span className='tooltip'>TP %:   <span className="tooltiptext">The percent of the samples seen in training that are correctly enclosed by the dragged square.</span></span><span className='cm-value'> {this.state.sampleStatistics.tp.toFixed(2)}%</span>
+                          </div>
+                        </Grid>
+                        <Grid item xs={6}>
+                          <div className='evaluation-cm-item false-positive'>
+                            <span className='tooltip'>FP %:   <span className="tooltiptext">The percent of the samples seen in training that are in the dragged square, but shouldn't be.</span></span><span className='cm-value'> {this.state.sampleStatistics.fp.toFixed(2)}%</span>
+                          </div>
+                        </Grid>
+                        <Grid item xs={6}>
+                          <div className='evaluation-cm-item false-negative'>
+                            <span className='tooltip'>FN %:   <span className="tooltiptext">The percent of the samples seen in training that are not in the dragged square, but should be.</span></span><span className='cm-value'> {this.state.sampleStatistics.fn.toFixed(2)}%</span>
+                          </div>
+                        </Grid>
+                        <Grid item xs={6}>
+                          <div className='evaluation-cm-item true-negative'>
+                            <span className='tooltip'>TN %:   <span className="tooltiptext">The percent of the samples seen in training that are correctly not in the dragged square.</span></span><span className='cm-value'> {this.state.sampleStatistics.tn.toFixed(2)}%</span>
+                          </div>
+                        </Grid>
                       </Grid>
-                      <Grid item xs={12}>
-                        <div className='evaluation-accuracy'>
-                          <span className='accuracy-span'>Total Training Error: {this.state.sampleStatistics.error.toFixed(2)}%</span>
-                        </div>
+                    </div>
+                  </Grid>
+                  <Grid item xs={6}>
+                    <div className='evaluation-statistics evaluation-statistics-testing'>
+                      <Grid container space={2}>
+                        <Grid item xs={12}>
+                          <div className='evaluation-accuracy'>
+                            <span className='accuracy-span'>Seen <b>{this.state.testing ? this.state.total_samples : 0}</b> out of {this.state.total_samples} total testing samples.</span>
+                          </div>
+                        </Grid>
+                        <Grid item xs={12}>
+                          <div className='evaluation-accuracy'>
+                            <span className='accuracy-span'>Total Testing Error: {this.state.testStatistics.error.toFixed(2)}%</span>
+                          </div>
+                        </Grid>
+                        <Grid item xs={6}>
+                          <div className='evaluation-cm-item true-positive'>
+                            <span className='tooltip'>TP %:   <span className="tooltiptext">The percent of the full space that is true positives (the dark green area).</span></span><span className='cm-value'> {this.state.testStatistics.tp.toFixed(2)}%</span>
+                          </div>
+                        </Grid>
+                        <Grid item xs={6}>
+                          <div className='evaluation-cm-item false-positive'>
+                            <span className='tooltip'>FP %:   <span className="tooltiptext">The percent of the full space that is false positives (the gray area).</span></span><span className='cm-value'> {this.state.testStatistics.fp.toFixed(2)}%</span>
+                          </div>
+                        </Grid>
+                        <Grid item xs={6}>
+                          <div className='evaluation-cm-item false-negative'>
+                            <span className='tooltip'>FN %:   <span className="tooltiptext">The percent of the full space that is false negatives (the light green area).</span></span><span className='cm-value'> {this.state.testStatistics.fn.toFixed(2)}%</span>
+                          </div>
+                        </Grid>
+                        <Grid item xs={6}>
+                          <div className='evaluation-cm-item true-negative'>
+                            <span className='tooltip'>TN %:   <span className="tooltiptext">The percent of the full space that is true negatives (the area out of either squar).</span></span><span className='cm-value'> {this.state.testStatistics.tn.toFixed(2)}%</span>
+                          </div>
+                        </Grid>
                       </Grid>
-                      <Grid item xs={6}>
-                        <div className='evaluation-cm-item true-positive'>
-                          <span className='tooltip'>TP %:   <span className="tooltiptext">The percent of the samples seen in training that are correctly enclosed by the dragged square.</span></span><span className='cm-value'> {this.state.sampleStatistics.tp.toFixed(2)}%</span>
-                        </div>
-                      </Grid>
-                      <Grid item xs={6}>
-                        <div className='evaluation-cm-item false-positive'>
-                          <span className='tooltip'>FP %:   <span className="tooltiptext">The percent of the samples seen in training that are in the dragged square, but shouldn't be.</span></span><span className='cm-value'> {this.state.sampleStatistics.fp.toFixed(2)}%</span>
-                        </div>
-                      </Grid>
-                      <Grid item xs={6}>
-                        <div className='evaluation-cm-item false-negative'>
-                          <span className='tooltip'>FN %:   <span className="tooltiptext">The percent of the samples seen in training that are not in the dragged square, but should be.</span></span><span className='cm-value'> {this.state.sampleStatistics.fn.toFixed(2)}%</span>
-                        </div>
-                      </Grid>
-                      <Grid item xs={6}>
-                        <div className='evaluation-cm-item true-negative'>
-                          <span className='tooltip'>TN %:   <span className="tooltiptext">The percent of the samples seen in training that are correctly not in the dragged square.</span></span><span className='cm-value'> {this.state.sampleStatistics.tn.toFixed(2)}%</span>
-                        </div>
-                      </Grid>
-                    </Grid>
-                  </div>
-                </Grid>
-                <Grid item xs={6}>
-                  <div className='evaluation-statistics evaluation-statistics-testing'>
-                    <Grid container space={2}>
-                      <Grid item xs={12}>
-                        <div className='evaluation-accuracy'>
-                          <span className='accuracy-span'>Seen <b>{this.state.testing ? this.state.total_samples : 0}</b> out of {this.state.total_samples} total testing samples.</span>
-                        </div>
-                      </Grid>
-                      <Grid item xs={12}>
-                        <div className='evaluation-accuracy'>
-                          <span className='accuracy-span'>Total Testing Error: {this.state.testStatistics.error.toFixed(2)}%</span>
-                        </div>
-                      </Grid>
-                      <Grid item xs={6}>
-                        <div className='evaluation-cm-item true-positive'>
-                          <span className='tooltip'>TP %:   <span className="tooltiptext">The percent of the full space that is true positives (the dark green area).</span></span><span className='cm-value'> {this.state.testStatistics.tp.toFixed(2)}%</span>
-                        </div>
-                      </Grid>
-                      <Grid item xs={6}>
-                        <div className='evaluation-cm-item false-positive'>
-                          <span className='tooltip'>FP %:   <span className="tooltiptext">The percent of the full space that is false positives (the gray area).</span></span><span className='cm-value'> {this.state.testStatistics.fp.toFixed(2)}%</span>
-                        </div>
-                      </Grid>
-                      <Grid item xs={6}>
-                        <div className='evaluation-cm-item false-negative'>
-                          <span className='tooltip'>FN %:   <span className="tooltiptext">The percent of the full space that is false negatives (the light green area).</span></span><span className='cm-value'> {this.state.testStatistics.fn.toFixed(2)}%</span>
-                        </div>
-                      </Grid>
-                      <Grid item xs={6}>
-                        <div className='evaluation-cm-item true-negative'>
-                          <span className='tooltip'>TN %:   <span className="tooltiptext">The percent of the full space that is true negatives (the area out of either squar).</span></span><span className='cm-value'> {this.state.testStatistics.tn.toFixed(2)}%</span>
-                        </div>
-                      </Grid>
-                    </Grid>
-                  </div>
+                    </div>
+                  </Grid>
                 </Grid>
               </Grid>
             </Grid>
-          </Grid>
-        </Paper>
+          </Paper>
+        </div>
       </div>
     );
   }
