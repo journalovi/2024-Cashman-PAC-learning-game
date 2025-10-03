@@ -8,7 +8,7 @@ conf['margin'] = {
     'bottom': 30, 
     'left': 40
 };
-conf['width'] = 500
-conf['height'] = 500
+conf['width'] = 400
+conf['height'] = 400
 
 module.exports = conf;

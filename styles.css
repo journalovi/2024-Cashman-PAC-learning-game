@@ -215,6 +215,7 @@
 
   /* Transition for opacity and pointer-events */
   transition: opacity 0.3s ease-in-out;
+  z-index: 5000000;
 }
 
 .mobile-warning-toast-content {
@@ -339,5 +340,9 @@
   .katex {
     z-index: -10;
     position: relative;
+  }
+
+  .fixed {
+    padding: 0;
   }
 }
