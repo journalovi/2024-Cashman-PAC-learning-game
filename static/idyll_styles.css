@@ -1433,10 +1433,10 @@ span.idyll-input-error{
 }
 
 /* --------------------------------- */
-/* 2. MOBILE LAYOUT (Applied below 768px) */
+/* 2. MOBILE LAYOUT (Applied below 1000px) */
 /* --------------------------------- */
 
-@media (max-width: 768px) {
+@media (max-width: 1000px) {
   .idyll-root {
     flex-direction: column;
     height: auto;
