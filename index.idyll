@@ -397,23 +397,23 @@ Thank you to Anselm Blumer and the reviewers from VisXAI and the The Journal of 
 
 ## References
 
-- Blumer, Anselm, et al. "Learnability and the Vapnik-Chervonenkis dimension." Journal of the ACM (JACM) 36.4 (1989): 929-965.
-- Valiant, Leslie G. "A theory of the learnable." Communications of the ACM 27.11 (1984): 1134-1142.
-- Kearns, Michael J., and Umesh Vazirani. An introduction to computational learning theory. MIT press, 1994.
-- Feng, Alice, et al. "The myth of the impartial machine." The Parametric Press (2019).
-- Vapnik, Vladimir. "Principles of risk minimization for learning theory." Advances in neural information processing systems 4 (1991).
-- Varshney, Kush R., and Homa Alemzadeh. "On the safety of machine learning: Cyber-physical systems, decision sciences, and data products." Big data 5.3 (2017): 246-255.
-- Valiant, Leslie. "Probably approximately correct: nature's algorithms for learning and prospering in a complex world." (2013).
+- Blumer, Anselm, et al. "Learnability and the Vapnik-Chervonenkis dimension." Journal of the ACM (JACM) 36.4 (1989): 929-965.  DOI: https://doi.org/10.1145/76359.76371
+- Valiant, Leslie G. "A theory of the learnable." Communications of the ACM 27.11 (1984): 1134-1142. DOI: https://doi.org/10.1145/1968.1972
+- Kearns, Michael J., and Umesh Vazirani. "An introduction to computational learning theory."" MIT press, 1994. DOI: https://doi.org/10.7551/mitpress/3897.001.0001
+- Feng, Alice, et al. "The myth of the impartial machine." The Parametric Press (2019). DOI: https://doi.org/10.5281/zenodo.2655980
+- Vapnik, Vladimir. "Principles of risk minimization for learning theory." Advances in neural information processing systems 4 (1991). DOI: https://dl.acm.org/doi/10.5555/2986916.2987018
+- Varshney, Kush R., and Homa Alemzadeh. "On the safety of machine learning: Cyber-physical systems, decision sciences, and data products." Big data 5.3 (2017): 246-255. DOI: https://doi.org/10.1089/big.2016.0051
+- Valiant, Leslie. "Probably approximately correct: nature's algorithms for learning and prospering in a complex world." (2013). DOI: https://dl.acm.org/doi/10.5555/2765677
 - Adiga, Abhijin, et al. "PAC learnability of node functions in networked dynamical systems." International Conference on Machine Learning. PMLR, 2019.
-- Shao, Han, Omar Montasser, and Avrim Blum. "A theory of pac learnability under transformation invariances." Advances in Neural Information Processing Systems 35 (2022): 13989-14001.
-- Badue, Claudine, et al. "Self-driving cars: A survey." Expert Systems with Applications 165 (2021): 113816.
-- Kwon, Joon-myoung, et al. "Validation of deep-learning-based triage and acuity score using a large national dataset." PloS one 13.10 (2018): e0205836.
-- Wu, Shaobing, et al. "Crime prediction using data mining and machine learning." The 8th International Conference on Computer Engineering and Networks (CENet2018). Springer International Publishing, 2020.
-- Fujiyoshi, Hironobu, Tsubasa Hirakawa, and Takayoshi Yamashita. "Deep learning-based image recognition for autonomous driving." IATSS research 43.4 (2019): 244-252.
+- Shao, Han, Omar Montasser, and Avrim Blum. "A theory of pac learnability under transformation invariances." Advances in Neural Information Processing Systems 35 (2022): 13989-14001. DOI: https://dl.acm.org/doi/10.5555/3600270.3601287
+- Badue, Claudine, et al. "Self-driving cars: A survey." Expert Systems with Applications 165 (2021): 113816. DOI: https://doi.org/10.1016/j.eswa.2020.113816
+- Kwon, Joon-myoung, et al. "Validation of deep-learning-based triage and acuity score using a large national dataset." PloS one 13.10 (2018): e0205836. DOI: https://doi.org/10.1371/journal.pone.0205836
+- Wu, Shaobing, et al. "Crime prediction using data mining and machine learning." The 8th International Conference on Computer Engineering and Networks (CENet2018). Springer International Publishing, 2020. DOI: https://doi.org/10.1007/978-3-030-14680-1_40
+- Fujiyoshi, Hironobu, Tsubasa Hirakawa, and Takayoshi Yamashita. "Deep learning-based image recognition for autonomous driving." IATSS research 43.4 (2019): 244-252. DOI: https://doi.org/10.1016/j.iatssr.2019.11.008
 - Buolamwini, Joy, and Timnit Gebru. "Gender shades: Intersectional accuracy disparities in commercial gender classification." Conference on fairness, accountability and transparency. PMLR, 2018.
-- Wolpert, David H., and William G. Macready. "No free lunch theorems for optimization." IEEE transactions on evolutionary computation 1.1 (1997): 67-82.
-- Wolpert, David H. "What is important about the no free lunch theorems?." Black box optimization, machine learning, and no-free lunch theorems. Cham: Springer International Publishing, 2021. 373-388.
-- Tabacof, Pedro, and Eduardo Valle. "Exploring the space of adversarial images." 2016 international joint conference on neural networks (IJCNN). IEEE, 2016.
+- Wolpert, David H., and William G. Macready. "No free lunch theorems for optimization." IEEE transactions on evolutionary computation 1.1 (1997): 67-82. DOI: https://dl.acm.org/doi/abs/10.1109/4235.585893
+- Wolpert, David H. "What is important about the no free lunch theorems?." Black box optimization, machine learning, and no-free lunch theorems. Cham: Springer International Publishing, 2021. 373-388. DOI: https://doi.org/10.48550/arXiv.2007.10928
+- Tabacof, Pedro, and Eduardo Valle. "Exploring the space of adversarial images." 2016 international joint conference on neural networks (IJCNN). IEEE, 2016. DOI: https://doi.org/10.1109/IJCNN.2016.7727230
 
 
 ## Research Material Statements
